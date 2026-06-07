@@ -3,7 +3,7 @@ import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from typing import List
 
-ARXIV_OAI_URL = "http://export.arxiv.org/oai2"
+ARXIV_OAI_URL = "https://oaipmh.arxiv.org/oai"
 
 async def harvest_arxiv_oai(sets: List[str], since: datetime) -> List[str]:
     """
@@ -20,7 +20,7 @@ async def harvest_arxiv_oai(sets: List[str], since: datetime) -> List[str]:
         'oai_dc': 'http://www.openarchives.org/OAI/2.0/oai_dc/'
     }
     
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(follow_redirects=True) as client:
         for s in sets:
             url = f"{ARXIV_OAI_URL}?verb=ListRecords&metadataPrefix=oai_dc&set={s}&from={from_date}"
             try:
@@ -62,7 +62,7 @@ async def harvest_biorxiv_api(since: datetime) -> List[str]:
     
     url = f"https://api.biorxiv.org/details/biorxiv/{start_date}/{end_date}/0"
     
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(follow_redirects=True) as client:
         try:
             response = await client.get(url, timeout=30.0)
             if response.status_code == 200:
