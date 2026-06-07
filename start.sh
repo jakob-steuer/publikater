@@ -32,4 +32,4 @@ cd ..
 
 # Launch the app using uv's managed python
 echo "[INFO] Launching Publikater..."
-uv run --project backend python launcher.py
+uv run --project backend python launcher.py "$@"

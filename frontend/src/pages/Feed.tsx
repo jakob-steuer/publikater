@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import axios from 'axios'
 import { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
 import { ItemCard } from '../components/ItemCard'
 import { FilterBar } from '../components/FilterBar'
 import type { Item, SyncProgress, Follow } from '../types'
@@ -233,12 +233,33 @@ export default function Feed({ showRead, showPreprints, searchQuery, isDark, tog
         </div>
       ) : dashboard ? (
         <div className="space-y-12">
-          {dashboard?.do_not_miss?.length === 0 && dashboard?.this_week?.length === 0 && dashboard?.starred?.length === 0 && dashboard?.highlighted_authors?.length === 0 && (
+          {topics?.length === 0 ? (
+            <div className="py-20 px-4 text-center border-2 border-dashed rounded-xl bg-card">
+              <h3 className="text-2xl font-bold mb-4">Welcome to Publikater! 👋</h3>
+              <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                You don't have any topics set up yet. Publikater needs to know what you're interested in before it can fetch and summarize papers for you.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link 
+                  to="/settings" 
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-2.5 rounded-lg font-medium transition-colors"
+                >
+                  Create Your First Topic
+                </Link>
+                <Link 
+                  to="/help" 
+                  className="bg-muted text-muted-foreground hover:text-foreground px-6 py-2.5 rounded-lg font-medium transition-colors"
+                >
+                  Read the Guide
+                </Link>
+              </div>
+            </div>
+          ) : dashboard?.do_not_miss?.length === 0 && dashboard?.this_week?.length === 0 && dashboard?.starred?.length === 0 && dashboard?.highlighted_authors?.length === 0 ? (
             <div className="py-20 text-center border-2 border-dashed rounded-xl">
               <h3 className="text-xl font-semibold mb-2">Inbox Zero! 🎉</h3>
               <p className="text-muted-foreground">You are completely caught up on your research.</p>
             </div>
-          )}
+          ) : null}
           
           {renderSection("Do Not Miss", "🔥", dashboard?.do_not_miss, "donotmiss")}
           {renderSection("Followed Authors", "👥", dashboard?.highlighted_authors, "highlighted")}
