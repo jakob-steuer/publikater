@@ -370,7 +370,7 @@ export default function Settings() {
               Semantic Scholar API Key
             </label>
             {!s2Key && (
-              <p className="text-xs text-red-600 dark:text-red-400 font-bold mb-2">
+              <p className="text-xs text-foreground font-bold mb-2">
                 Highly Recommended: Without this key, fetching will likely fail due to rate limits.
               </p>
             )}
