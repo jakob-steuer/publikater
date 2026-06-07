@@ -239,8 +239,8 @@ export default function Feed({ showRead, showPreprints, searchQuery, isDark, tog
               <p className="text-muted-foreground mb-4 max-w-md mx-auto">
                 You don't have any topics set up yet. Publicat needs to know what you're interested in before it can fetch and summarize papers for you.
               </p>
-              <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-lg p-4 mb-6 max-w-md mx-auto text-left">
-                <p className="text-sm text-red-800 dark:text-red-300">
+              <div className="bg-background border border-foreground rounded-lg p-4 mb-6 max-w-md mx-auto text-left">
+                <p className="text-sm text-foreground">
                   <span className="font-bold">Highly Recommended:</span> Before creating a topic, please add a free Semantic Scholar API key in the Settings page. Without it, the app will likely hit aggressive rate limits and fail to fetch papers.
                 </p>
               </div>
