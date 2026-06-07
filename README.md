@@ -103,6 +103,16 @@ Every topic in Publikater features a dedicated "🪄 Zotero RSS URL" button at t
 
 ---
 
+## 🧠 Local vs. Cloud AI
+
+Publikater relies heavily on AI. All semantic embedding and paper matching runs **100% locally** on your machine using optimized PyTorch models. 
+
+For generating the actual text summaries, you have a choice (configurable in Settings):
+- **Cloud APIs (Recommended):** By entering a Gemini or Anthropic API key, Publikater can summarize dozens of complex papers in parallel in seconds with state-of-the-art accuracy.
+- **Local (Ollama):** If you provide no API keys, Publikater automatically falls back to your local Ollama installation. While highly private, generating 20+ scientific summaries sequentially on a local 8B model will take significantly longer and requires powerful hardware.
+
+---
+
 ## ⚖️ Legal & Tech Stack
 
 **Tech Stack:** React, TypeScript, Vite, TailwindCSS • Python, FastAPI, SQLite • Semantic Scholar SPECTER v2, Gemini, Anthropic.
