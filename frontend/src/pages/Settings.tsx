@@ -41,6 +41,7 @@ export default function Settings() {
   // Config state
   const [geminiKey, setGeminiKey] = useState('')
   const [anthropicKey, setAnthropicKey] = useState('')
+  const [s2Key, setS2Key] = useState('')
   const [budget, setBudget] = useState('5.0')
   const [isSavingConfig, setIsSavingConfig] = useState(false)
 
@@ -69,6 +70,8 @@ export default function Settings() {
       setGeminiKey(config.gemini_api_key || '')
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setAnthropicKey(config.anthropic_api_key || '')
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setS2Key(config.s2_api_key || '')
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setBudget(config.anthropic_budget_limit?.toString() || '5.0')
     }
@@ -136,7 +139,7 @@ export default function Settings() {
   })
 
   const saveSettings = useMutation({
-    mutationFn: async (newSettings: { gemini_api_key?: string, anthropic_api_key?: string, anthropic_budget_limit?: number }) => {
+    mutationFn: async (newSettings: { gemini_api_key?: string, anthropic_api_key?: string, s2_api_key?: string, anthropic_budget_limit?: number }) => {
       return axios.post('http://localhost:8001/settings/', newSettings)
     },
     onSuccess: () => {
@@ -176,6 +179,7 @@ export default function Settings() {
     saveSettings.mutate({
       gemini_api_key: geminiKey,
       anthropic_api_key: anthropicKey,
+      s2_api_key: s2Key,
       anthropic_budget_limit: parseFloat(budget)
     })
   }
@@ -361,6 +365,16 @@ export default function Settings() {
         </p>
         
         <form onSubmit={handleSaveConfig} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Semantic Scholar API Key (Recommended)</label>
+            <input 
+              type="password" 
+              value={s2Key}
+              onChange={e => setS2Key(e.target.value)}
+              placeholder="Get one for free at semanticscholar.org/product/api"
+              className="w-full p-2 rounded border bg-background"
+            />
+          </div>
           <div>
             <label className="block text-sm font-medium mb-1">Gemini API Key (Tier 2)</label>
             <input 

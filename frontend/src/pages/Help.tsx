@@ -99,10 +99,28 @@ export default function Help() {
           </div>
         </section>
 
-        {/* Section 5: LLM Architecture */}
+        {/* Section 5: Semantic Scholar API Key */}
         <section>
           <h2 className="text-2xl font-semibold mb-4 text-primary flex items-center gap-2">
-            5. Local vs. Cloud AI
+            5. Semantic Scholar API Key
+          </h2>
+          <p className="text-foreground/80 leading-relaxed mb-4">
+            Publikater relies heavily on the Semantic Scholar API to discover new papers. While the app will run without an API key, the unauthenticated tier is heavily rate-limited globally. Without a key, your paper fetching may fail with "Too Many Requests" errors.
+          </p>
+          <div className="bg-primary/5 border border-primary/20 p-5 rounded-xl">
+            <h3 className="font-semibold text-primary mb-2">How to get your free key (Takes 30 seconds):</h3>
+            <ol className="list-decimal pl-5 space-y-1 text-sm text-foreground/80">
+              <li>Go to <a href="https://www.semanticscholar.org/product/api" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">semanticscholar.org/product/api</a></li>
+              <li>Click "Get an API Key" and fill out the quick form.</li>
+              <li>Once you receive your key, paste it into the <strong>Settings</strong> page inside the Publikater app.</li>
+            </ol>
+          </div>
+        </section>
+
+        {/* Section 6: LLM Architecture */}
+        <section>
+          <h2 className="text-2xl font-semibold mb-4 text-primary flex items-center gap-2">
+            6. Local vs. Cloud AI
           </h2>
           <p className="text-foreground/80 leading-relaxed mb-4">
             Publikater runs all semantic matching and paper scoring <strong>100% locally</strong> on your machine. However, for generating the actual text summaries, you can configure your LLM preference in the <Link to="/settings" className="text-primary hover:underline">Settings</Link> page.

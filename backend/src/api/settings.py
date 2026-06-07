@@ -16,6 +16,7 @@ def get_settings(db: Session = Depends(get_db)):
     return {
         "gemini_api_key": get_config_value(db, "gemini_api_key", ""),
         "anthropic_api_key": get_config_value(db, "anthropic_api_key", ""),
+        "s2_api_key": get_config_value(db, "s2_api_key", ""),
         "anthropic_budget_limit": float(get_config_value(db, "anthropic_budget_limit", "5.0")),
         "last_synced_at": get_config_value(db, "last_synced_at", None)
     }
@@ -33,6 +34,8 @@ def update_settings(settings: SettingsUpdate, db: Session = Depends(get_db)):
         set_config("gemini_api_key", settings.gemini_api_key)
     if settings.anthropic_api_key is not None:
         set_config("anthropic_api_key", settings.anthropic_api_key)
+    if settings.s2_api_key is not None:
+        set_config("s2_api_key", settings.s2_api_key)
     if settings.anthropic_budget_limit is not None:
         set_config("anthropic_budget_limit", str(settings.anthropic_budget_limit))
         

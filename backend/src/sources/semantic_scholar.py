@@ -3,6 +3,8 @@ import httpx
 from typing import List, Dict, Any
 from datetime import datetime
 from src.config import settings
+from src.database import SessionLocal
+from src.models.app_config import AppConfig
 
 S2_SEARCH_URL = "https://api.semanticscholar.org/graph/v1/paper/search"
 S2_BATCH_URL = "https://api.semanticscholar.org/graph/v1/paper/batch"
@@ -13,8 +15,17 @@ s2_semaphore = asyncio.Semaphore(1)
 
 async def _fetch_s2_with_retry(client: httpx.AsyncClient, url: str, method: str = "GET", params: dict = None, json_data: dict = None, retries: int = 3):
     headers = {}
-    if settings.s2_api_key:
-        headers["x-api-key"] = settings.s2_api_key
+    
+    # Try DB config first, fallback to env
+    db = SessionLocal()
+    try:
+        conf = db.query(AppConfig).filter(AppConfig.key == "s2_api_key").first()
+        active_key = conf.value if conf and conf.value else settings.s2_api_key
+    finally:
+        db.close()
+        
+    if active_key:
+        headers["x-api-key"] = active_key
         
     for attempt in range(retries):
         async with s2_semaphore:

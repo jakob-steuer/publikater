@@ -103,6 +103,17 @@ Every topic in Publikater features a dedicated "Zotero RSS URL" button at the to
 
 ---
 
+## Semantic Scholar API Key (Highly Recommended)
+
+Publikater relies on the Semantic Scholar API to discover new papers. While the app will run without an API key, the unauthenticated tier is heavily rate-limited globally. **Without a key, your paper fetching may fail with "Too Many Requests" errors.**
+
+**How to get your free key (Takes 30 seconds):**
+1. Go to [semanticscholar.org/product/api](https://www.semanticscholar.org/product/api)
+2. Click "Get an API Key" and fill out the quick form.
+3. Once you have your key, paste it into the **Settings** page inside the Publikater app.
+
+---
+
 ## Local vs. Cloud AI
 
 Publikater relies heavily on AI. All semantic embedding and paper matching runs **100% locally** on your machine using optimized PyTorch models. 
