@@ -1,6 +1,7 @@
 from src.database import engine
 from src.models.base import Base
 from src.models.item import Item
+from src.models.item_score import ItemScore
 from src.models.topic import Topic
 from src.models.app_config import AppConfig
 from src.models.follow import Follow

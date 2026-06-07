@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import type { UseMutationResult } from '@tanstack/react-query'
 import type { Item, Follow } from '../types'
@@ -30,6 +31,9 @@ export function ItemCard({
   unacknowledgeItem,
   hideItem
 }: ItemCardProps) {
+  const [expandedAuthors, setExpandedAuthors] = useState(false)
+  const isLongAuthorList = (item.author_details?.length ?? item.authors?.length ?? 0) > 8
+  
   return (
     <div key={item.id} className="relative flex flex-col justify-between bg-card rounded-md border-t-4 border-t-primary/80 border-x border-b shadow-sm hover:shadow-md transition-shadow p-5 pt-6 group mt-4">
       {/* Top left score */}
@@ -120,12 +124,13 @@ export function ItemCard({
 
         {/* 2. Title and Authors */}
         <div className="mb-4 border-l-2 border-muted pl-3">
-          <h3 className="font-semibold text-sm leading-snug mb-1 text-muted-foreground group-hover:text-foreground transition-colors">
+          <h3 className={`font-semibold text-sm leading-snug mb-1 text-muted-foreground group-hover:text-foreground transition-colors cursor-pointer ${expandedAuthors ? '' : 'line-clamp-2'}`} onClick={() => setExpandedAuthors(!expandedAuthors)} title="Click to expand/collapse">
             {item.title}
           </h3>
           <p className="text-xs text-muted-foreground/80 leading-relaxed flex flex-wrap gap-x-1.5 gap-y-1 items-center">
             {item.author_details && item.author_details.length > 0 ? (
-              item.author_details.map((author: { authorId?: string; orcid?: string; name: string }, idx: number) => {
+              <>
+                {(expandedAuthors ? item.author_details : item.author_details.slice(0, 8)).map((author: { authorId?: string; orcid?: string; name: string }, idx: number, arr: any[]) => {
                 const s2Id = author.authorId ? `AUTHOR_ID:${author.authorId}` : (author.orcid ? `ORCID:${author.orcid}` : null);
                 const followRecord = s2Id ? follows?.find((f: Follow) => f.entity_type === 'author' && f.entity_value === s2Id) : null;
                 const isFollowed = !!followRecord;
@@ -158,12 +163,19 @@ export function ItemCard({
                     ) : (
                       <span className={isFollowed ? 'text-primary font-semibold' : ''}>{author.name}</span>
                     )}
-                    {idx < (item.author_details?.length ?? 0) - 1 && <span className="text-muted-foreground">,</span>}
+                    {idx < arr.length - 1 && <span className="text-muted-foreground">,</span>}
                   </span>
                 )
-              })
-            ) : (
-              item.authors?.map((author: string, idx: number) => {
+                })}
+                {!expandedAuthors && isLongAuthorList && (
+                  <button onClick={() => setExpandedAuthors(true)} className="text-primary hover:underline font-medium text-[10px] ml-1 bg-primary/10 px-1.5 py-0.5 rounded">
+                    + {item.author_details.length - 8} more
+                  </button>
+                )}
+              </>
+            ) : item.authors && item.authors.length > 0 ? (
+              <>
+                {(expandedAuthors ? item.authors : item.authors.slice(0, 8)).map((author: string, idx: number, arr: string[]) => {
                 const followRecord = follows?.find((f: Follow) => f.entity_type === 'author' && f.entity_value.toLowerCase() === author.toLowerCase())
                 const isFollowed = !!followRecord
                 return (
@@ -185,11 +197,17 @@ export function ItemCard({
                     >
                       {isFollowed ? '✓' : '+'}
                     </button>
-                    {idx < item.authors.length - 1 && <span className="text-muted-foreground">,</span>}
+                    {idx < arr.length - 1 && <span className="text-muted-foreground">,</span>}
                   </span>
                 )
-              })
-            )}
+                })}
+                {!expandedAuthors && isLongAuthorList && (
+                  <button onClick={() => setExpandedAuthors(true)} className="text-primary hover:underline font-medium text-[10px] ml-1 bg-primary/10 px-1.5 py-0.5 rounded">
+                    + {item.authors.length - 8} more
+                  </button>
+                )}
+              </>
+            ) : null}
           </p>
         </div>
         

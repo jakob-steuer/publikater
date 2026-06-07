@@ -46,9 +46,9 @@ export default function Help() {
           <p className="text-foreground/80 mb-4 leading-relaxed">
             The AI matches papers based on the semantic meaning of your topic description and strict keyword boosting. For the best results, focus heavily on the <strong>methodology and core concepts</strong>, and avoid generic statements.
           </p>
-          <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-5 mb-4">
-            <h3 className="font-semibold text-amber-700 dark:text-amber-500 mb-2">💡 Pro Tip: Use ChatGPT to write your topic</h3>
-            <p className="text-sm text-amber-900/80 dark:text-amber-200/80 italic mb-2">
+          <div className="bg-primary/5 border border-primary/20 rounded-xl p-5 mb-4">
+            <h3 className="font-semibold text-primary mb-2">💡 Pro Tip: Use an LLM to write your topic</h3>
+            <p className="text-sm text-foreground/80 italic mb-2">
               "I want to create a feed for academic papers about [Your Topic]. Write a 2-3 sentence description focusing strictly on the methodology and core technologies involved, avoiding generic outcomes. Then provide a comma-separated list of 3-5 hyper-specific keywords."
             </p>
           </div>
@@ -74,7 +74,7 @@ export default function Help() {
             If you see a paper by an author you want to track, simply click the <span className="font-mono bg-muted px-1 rounded text-xs">+</span> icon next to their name. 
           </p>
           <p className="text-foreground/80 leading-relaxed">
-            Any future paper published by a followed author automatically receives a massive <strong>+15% score boost</strong>, guaranteeing it rises to the top of your "Do Not Miss" feed. You can manage your followed authors in the <Link to="/settings" className="text-primary hover:underline">Settings</Link> page.
+            Any future paper published by a followed author automatically receives a <strong>+15% score boost</strong>, guaranteeing it rises to the top of your "Do Not Miss" feed. You can manage your followed authors in the <Link to="/settings" className="text-primary hover:underline">Settings</Link> page.
           </p>
         </section>
 

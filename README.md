@@ -31,7 +31,7 @@ We use a modern installation approach to ensure your local AI tools are hardware
 *What does this do?*
 It automatically checks for and installs `uv` (a blazingly fast Python manager), creates an isolated virtual environment, installs PyTorch optimally for your system (CUDA/MPS), builds the React frontend, and launches the app in your browser at `http://localhost:8001`!
 
-### The Manual Developer Way
+### Manual Installation
 Make sure you have Node.js (v18+) and Python (3.11+) with `uv` installed.
 
 1. **Clone the repository:**
@@ -67,7 +67,7 @@ Publikater uses advanced AI to semantically match papers to your topics. The bet
 **Pro Tip for Topic Descriptions:** Don't use a generic list of outcomes (like "predicts 3D structures"). Focus heavily on the *methodology* and the core concepts you want to read about.
 
 ### Example LLM Prompt to Generate a Great Topic
-If you're unsure how to describe your topic, ask ChatGPT/Claude:
+If you're unsure how to describe your topic, ask an LLM of your choice:
 > *"I want to create a feed for academic papers about [Your Topic]. Write a 2-3 sentence description focusing strictly on the methodology and core technologies involved, avoiding generic outcomes. Then provide a comma-separated list of 3-5 hyper-specific keywords."*
 
 ### Example Topic
@@ -88,7 +88,7 @@ Publikater uses a simple, swipe-like tri-state system to help you reach Inbox Ze
 - ❌ **Discard:** Not relevant. Hides the paper entirely so it never clutters your feed again.
 
 ### Features at a Glance
-- **Follow Authors:** Click the `+` icon next to an author's name on any paper. Every future paper they publish will automatically receive a massive score boost (+15%) and be highlighted in your feed!
+- **Follow Authors:** Click the `+` icon next to an author's name on any paper. Every future paper they publish will automatically receive a score boost (+15%) and be highlighted in your feed!
 - **Export Citations:** Easily export your starred papers to share or use in manuscripts.
 
 ### Zotero Integration
