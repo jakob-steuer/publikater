@@ -31,7 +31,7 @@ export function EditTopicModal({ topic, isOpen, onClose, onSave, isSaving }: Edi
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-      <div className="bg-card border border-border rounded-xl shadow-lg w-full max-w-lg p-6 relative">
+      <div className="bg-white dark:bg-zinc-950 border border-border rounded-xl shadow-2xl w-full max-w-lg p-6 relative">
         <button 
           onClick={onClose}
           className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
