@@ -442,6 +442,16 @@ def get_starred_items(db: Session = Depends(get_db)):
         results.append(d)
     return results
 
+@router.get("/discarded", response_model=List[dict])
+def get_discarded_items(db: Session = Depends(get_db)):
+    items = db.query(Item).filter(Item.is_hidden).order_by(desc(Item.published_at)).all()
+    results = []
+    for item in items:
+        d = {**item.__dict__}
+        d.pop("_sa_instance_state", None)
+        results.append(d)
+    return results
+
 @router.put("/{item_id}/acknowledge", response_model=dict)
 def acknowledge_item(item_id: str, db: Session = Depends(get_db)):
     item = db.query(Item).filter(Item.id == item_id).first()

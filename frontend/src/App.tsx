@@ -6,6 +6,7 @@ import axios from 'axios'
 import Feed from './pages/Feed'
 import Settings from './pages/Settings'
 import Starred from './pages/Starred'
+import Discarded from './pages/Discarded'
 import Disclaimer from './pages/Disclaimer'
 import Help from './pages/Help'
 
@@ -217,6 +218,7 @@ function App() {
             <Route path="/topic/:topicId" element={<Feed showRead={showRead} showPreprints={showPreprints} searchQuery={searchQuery} isDark={isDark} toggleTheme={toggleTheme} />} />
             <Route path="/author/:authorId" element={<Feed showRead={showRead} showPreprints={showPreprints} searchQuery={searchQuery} isDark={isDark} toggleTheme={toggleTheme} />} />
             <Route path="/starred" element={<Starred />} />
+            <Route path="/discarded" element={<Discarded />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/disclaimer" element={<Disclaimer />} />
             <Route path="/help" element={<Help />} />

@@ -16,6 +16,7 @@ interface ItemCardProps {
   acknowledgeItem: UseMutationResult<any, Error, string, unknown>;
   unacknowledgeItem: UseMutationResult<any, Error, string, unknown>;
   hideItem: UseMutationResult<any, Error, string, unknown>;
+  unhideItem?: UseMutationResult<any, Error, string, unknown>;
 }
 
 export function ItemCard({
@@ -29,7 +30,8 @@ export function ItemCard({
   unstarItem,
   acknowledgeItem,
   unacknowledgeItem,
-  hideItem
+  hideItem,
+  unhideItem
 }: ItemCardProps) {
   const [expandedAuthors, setExpandedAuthors] = useState(false)
   const isLongAuthorList = (item.author_details?.length ?? item.authors?.length ?? 0) > 8
@@ -84,13 +86,23 @@ export function ItemCard({
             ↩
           </button>
         )}
-        <button 
-          onClick={() => hideItem.mutate(item.id)}
-          className="hover:scale-110 transition-transform p-1 bg-background/50 rounded-full text-red-500 font-bold ml-1"
-          title="Dismiss / Hide"
-        >
-          ❌
-        </button>
+        {item.is_hidden && unhideItem ? (
+          <button 
+            onClick={() => unhideItem.mutate(item.id)}
+            className="hover:scale-110 transition-transform p-1 bg-background/50 rounded-full text-blue-500 font-bold ml-1"
+            title="Recover / Unhide"
+          >
+            ↩️
+          </button>
+        ) : (
+          <button 
+            onClick={() => hideItem.mutate(item.id)}
+            className="hover:scale-110 transition-transform p-1 bg-background/50 rounded-full text-red-500 font-bold ml-1"
+            title="Dismiss / Hide"
+          >
+            ❌
+          </button>
+        )}
       </div>
       
       <div>
