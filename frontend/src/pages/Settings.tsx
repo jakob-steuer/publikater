@@ -361,8 +361,7 @@ export default function Settings() {
       <div className="border rounded-lg p-6 bg-card shadow-sm">
         <h2 className="text-xl font-semibold mb-4">API Keys</h2>
         <p className="text-sm text-muted-foreground mb-6">
-          Provide your API keys to enable Tier 2 (Brief Summaries via Gemini) and Tier 3 (Deep Summaries via Anthropic) AI processing.
-          Ollama will be used by default if keys are missing.
+          Provide an API key to enable AI summaries and keyword extraction. You only need to provide ONE key. If both are provided, Anthropic will be prioritized. If no key is provided, a local Ollama instance is used.
         </p>
         
         <form onSubmit={handleSaveConfig} className="space-y-4">
@@ -384,7 +383,7 @@ export default function Settings() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Gemini API Key (Tier 2)</label>
+            <label className="block text-sm font-medium mb-1">Gemini API Key (Gemini 2.5 Flash)</label>
             <input 
               type="password" 
               value={geminiKey}
@@ -394,7 +393,7 @@ export default function Settings() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Anthropic API Key (Tier 3)</label>
+            <label className="block text-sm font-medium mb-1">Anthropic API Key (Claude 3.5 Haiku)</label>
             <input 
               type="password" 
               value={anthropicKey}

@@ -5,7 +5,7 @@ from .base import LLMProvider
 class AnthropicProvider(LLMProvider):
     def __init__(self, api_key: str):
         self.client = AsyncAnthropic(api_key=api_key)
-        self.model = "claude-3-5-sonnet-latest"
+        self.model = "claude-3-5-haiku-latest"
         
     async def summarize_brief(self, text: str, topic_desc: str) -> tuple[str, int]:
         prompt = f"""You are a scientific newsletter editor summarizing a paper for a researcher interested in: '{topic_desc}'.

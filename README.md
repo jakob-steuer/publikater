@@ -122,7 +122,7 @@ Every topic in Publicat features a dedicated "Zotero RSS URL" button at the top 
 Publicat relies heavily on AI. All semantic embedding and paper matching runs **100% locally** on your machine using optimized PyTorch models. 
 
 For generating the actual text summaries, you have a choice (configurable in Settings):
-- **Cloud APIs (Recommended):** By entering a Gemini or Anthropic API key, Publicat can summarize dozens of complex papers in parallel in seconds with state-of-the-art accuracy.
+- **Cloud APIs (Recommended):** By entering a Gemini or Anthropic API key, Publicat can use extremely fast, cost-effective models (like Gemini Flash or Claude Haiku) to summarize dozens of complex papers in parallel in seconds with state-of-the-art accuracy. You only need to provide ONE API key.
 - **Local (Ollama):** If you provide no API keys, Publicat automatically falls back to your local Ollama installation. While highly private, generating 20+ scientific summaries sequentially on a local 8B model will take significantly longer and requires powerful hardware.
 
 ---

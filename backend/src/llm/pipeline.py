@@ -29,8 +29,13 @@ async def run_summarization_pipeline(db: Session = None):
         gemini_key = get_config("gemini_api_key")
         anthropic_key = get_config("anthropic_api_key")
         
-        tier2_provider = GeminiProvider(gemini_key) if gemini_key else OllamaProvider()
-        tier3_provider = AnthropicProvider(anthropic_key) if anthropic_key else tier2_provider
+        primary_provider = None
+        if anthropic_key:
+            primary_provider = AnthropicProvider(anthropic_key)
+        elif gemini_key:
+            primary_provider = GeminiProvider(gemini_key)
+        else:
+            primary_provider = OllamaProvider()
         
         # 1. Identify all items in the Dashboard Top 6
         active_topics = db.query(Topic).filter(Topic.is_active).all()
@@ -87,7 +92,7 @@ async def run_summarization_pipeline(db: Session = None):
                 if t:
                     topic_desc = t.description
                     
-            summary, rel_score = await tier2_provider.summarize_brief(abstract_text, topic_desc)
+            summary, rel_score = await primary_provider.summarize_brief(abstract_text, topic_desc)
             
             if summary:
                 item.t2_summary = summary
@@ -98,8 +103,8 @@ async def run_summarization_pipeline(db: Session = None):
                     item_score.final_score = item_score.semantic_score * relevance_multiplier
                 db.commit()
                 
-        # Tier 3 remains unchanged (deep dive for high relevance items)
-        tier3_candidates = db.query(ItemScore, Item, Topic).join(
+        # Primary Deep Summarization (for high relevance items missing it)
+        primary_candidates = db.query(ItemScore, Item, Topic).join(
             Item, ItemScore.item_id == Item.id
         ).join(
             Topic, ItemScore.topic_id == Topic.id
@@ -108,7 +113,7 @@ async def run_summarization_pipeline(db: Session = None):
             Item.tools is None
         ).all()
         
-        for score, item, topic in tier3_candidates:
+        for score, item, topic in primary_candidates:
             try:
                 import asyncio
                 from src.api.items import sync_state
@@ -123,12 +128,12 @@ async def run_summarization_pipeline(db: Session = None):
             if item.t1_tldr:
                 print(f"S2 TLDR present. Running Keyword Extraction for item: {item.id} on topic: {topic.name}")
                 abstract_text += f"\n\nTLDR Summary: {item.t1_tldr}"
-                tools = await tier3_provider.extract_keywords(abstract_text, topic.description)
+                tools = await primary_provider.extract_keywords(abstract_text, topic.description)
                 item.tools = tools
                 db.commit()
             else:
-                print(f"Running Tier 3 summarization for item: {item.id} on topic: {topic.name}")
-                deep_summary, tools = await tier3_provider.summarize_deep(abstract_text, topic.description)
+                print(f"Running deep summarization for item: {item.id} on topic: {topic.name}")
+                deep_summary, tools = await primary_provider.summarize_deep(abstract_text, topic.description)
                 if deep_summary:
                     item.t3_summary = deep_summary
                     item.tools = tools

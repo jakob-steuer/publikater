@@ -140,7 +140,7 @@ export default function Help() {
           <div className="grid md:grid-cols-2 gap-4">
             <div className="bg-primary/5 border border-primary/20 p-4 rounded-xl">
               <h3 className="font-semibold mb-1 text-primary">Cloud APIs</h3>
-              <p className="text-sm text-foreground/80">Using a Gemini or Anthropic API key allows Publicat to summarize dozens of complex papers in parallel in seconds with state-of-the-art accuracy.</p>
+              <p className="text-sm text-foreground/80">Using a Gemini or Anthropic API key allows Publicat to use fast, cost-effective models (like Gemini Flash or Claude Haiku) to summarize dozens of complex papers in parallel in seconds with state-of-the-art accuracy.</p>
             </div>
             <div className="bg-muted/30 border border-border/50 p-4 rounded-xl">
               <h3 className="font-semibold mb-1">Local (Ollama)</h3>
