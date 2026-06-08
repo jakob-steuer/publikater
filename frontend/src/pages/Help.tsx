@@ -76,6 +76,12 @@ export default function Help() {
           <p className="text-foreground/80 leading-relaxed">
             Any future paper published by a followed author automatically receives a <strong>+15% score boost</strong>, guaranteeing it rises to the top of your "Do Not Miss" feed. You can manage your followed authors in the <Link to="/settings" className="text-primary hover:underline">Settings</Link> page.
           </p>
+          <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 mt-4">
+            <h3 className="font-semibold text-primary mb-1">Automatic Journal Boosts</h3>
+            <p className="text-sm text-foreground/80">
+              Papers published in major high-impact life science and medical journals (like Nature, Science, Cell, NEJM) automatically receive a semantic score boost to ensure they surface in your feed.
+            </p>
+          </div>
         </section>
 
         {/* Section 4: Integrations */}

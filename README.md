@@ -89,6 +89,7 @@ Publicat uses a simple, swipe-like tri-state system to help you reach Inbox Zero
 
 ### Features at a Glance
 - **Follow Authors:** Click the `+` icon next to an author's name on any paper. Every future paper they publish will automatically receive a score boost (+15%) and be highlighted in your feed!
+- **High-Impact Journals:** Papers published in major life science and medical journals (like Nature, Science, Cell, NEJM) automatically receive a semantic score boost to ensure they surface in your feed.
 - **Export Citations:** Easily export your starred papers to share or use in manuscripts.
 
 ### Zotero Integration
