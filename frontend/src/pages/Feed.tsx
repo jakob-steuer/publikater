@@ -306,7 +306,7 @@ export default function Feed({ showRated, showPreprints, searchQuery, minScore, 
           )}
 
           {selectedItems.length > 0 && (
-            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-background border border-border shadow-2xl px-6 py-3 rounded-full flex items-center gap-4 z-50 animate-in slide-in-from-bottom-5">
+            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white dark:bg-zinc-950 border border-border shadow-2xl px-6 py-3 rounded-full flex items-center gap-4 z-50 animate-in slide-in-from-bottom-5">
               <span className="font-semibold text-sm">{selectedItems.length} selected</span>
               <div className="h-4 w-px bg-border"></div>
               <button 
