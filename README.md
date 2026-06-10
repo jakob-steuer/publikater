@@ -10,11 +10,11 @@
 
 ## Quick Start & Installation
 
-There are two ways to run Publicat: the **1-Click Launcher** (recommended for most users) or via manual command line setup.
+There are two ways to run Publicat: via the deployment scripts or via manual command line setup.
 
-### The 1-Click Launcher Way
+### Easy Installer Scripts
 
-We use a modern installation approach to ensure your local AI tools are hardware-accelerated and properly isolated.
+We provide deployment scripts to ensure your local AI tools are hardware-accelerated and properly isolated.
 
 **For Mac/Linux:**
 1. Download or `git clone` this repository.
@@ -29,10 +29,14 @@ We use a modern installation approach to ensure your local AI tools are hardware
 2. Double-click the `start.bat` file.
 
 *What does this do?*
-It automatically checks for and installs `uv` (a blazingly fast Python manager), creates an isolated virtual environment, installs PyTorch optimally for your system (CUDA/MPS), builds the React frontend, and launches the app in your browser at `http://localhost:8001`!
+It automatically checks for and installs `uv` (a Python manager), creates an isolated virtual environment, installs PyTorch for your system (CUDA/MPS), builds the React frontend, and launches the app in your browser at `http://localhost:8001`!
 
 ### Manual Installation
 Make sure you have Node.js (v18+) and Python (3.11+) with `uv` installed.
+To install `uv` on Mac/Linux, you can run:
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
 
 1. **Clone the repository:**
    ```bash
@@ -56,13 +60,13 @@ Make sure you have Node.js (v18+) and Python (3.11+) with `uv` installed.
    npm install
    npm run dev
    ```
-   Open `http://localhost:5173` in your browser!
+   Open `http://localhost:8001` in your browser!
 
 ---
 
 ## Tutorial: Setting Up Your First Topic
 
-Publicat uses advanced AI to semantically match papers to your topics. The better you describe your topic, the better your feed will be!
+Publicat uses AI to semantically match papers to your topics. The better you describe your topic, the better your feed will be!
 
 **Pro Tip for Topic Descriptions:** Don't use a generic list of outcomes (like "predicts 3D structures"). Focus heavily on the *methodology* and the core concepts you want to read about.
 

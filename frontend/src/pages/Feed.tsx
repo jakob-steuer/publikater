@@ -282,16 +282,16 @@ export default function Feed({ showRead, showPreprints, searchQuery, minScore, i
             </div>
           ) : null}
           
-          {renderSection("Do Not Miss", "🔥", dashboard?.do_not_miss, "donotmiss")}
-          {renderSection("Followed Authors", "👥", dashboard?.highlighted_authors, "highlighted")}
-          {renderSection("Extracted Tools", "🛠️", dashboard?.tools, "tools")}
-          {renderSection("This Week", "📅", dashboard?.this_week, "thisweek")}
-          {renderSection("This Month", "📚", dashboard?.this_month, "thismonth")}
-          {renderSection("Starred", "⭐", dashboard?.starred, "starred")}
+          {renderSection("Do Not Miss", "", dashboard?.do_not_miss, "donotmiss")}
+          {renderSection("Followed Authors", "", dashboard?.highlighted_authors, "highlighted")}
+          {renderSection("Extracted Tools", "", dashboard?.tools, "tools")}
+          {renderSection("This Week", "", dashboard?.this_week, "thisweek")}
+          {renderSection("This Month", "", dashboard?.this_month, "thismonth")}
+          {renderSection("Starred", "", dashboard?.starred, "starred")}
 
           {/* Fallback for unhandled sections */}
           {dashboard?.feed_sections && Object.entries(dashboard.feed_sections).map(([title, items]) => 
-            renderSection(title, "📚", items as Item[], `section-${title}`)
+            renderSection(title, "", items as Item[], `section-${title}`)
           )}
 
           {selectedItems.length > 0 && (

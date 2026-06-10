@@ -52,7 +52,7 @@ export function FilterBar({
             className="text-xs bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 px-3 py-1.5 rounded-md flex items-center gap-1.5 font-semibold transition-colors"
             title="Copy Zotero RSS Feed URL"
           >
-            🪄 Zotero RSS URL
+            Zotero RSS URL
           </button>
           
           <button 
