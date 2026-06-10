@@ -11,15 +11,15 @@ const fetchTopics = async () => {
   return data
 }
 
-const fetchDashboard = async (topicId?: string, authorId?: string, showAcknowledged: boolean = false, showPreprints: boolean = true) => {
-  let url = `http://localhost:8001/dashboard/?show_acknowledged=${showAcknowledged}&show_preprints=${showPreprints}`
+const fetchDashboard = async (topicId?: string, authorId?: string, showAcknowledged: boolean = false, showPreprints: boolean = true, minScore: number = 0.20) => {
+  let url = `http://localhost:8001/dashboard/?show_acknowledged=${showAcknowledged}&show_preprints=${showPreprints}&min_score=${minScore}`
   if (topicId) url += `&topic_id=${topicId}`
   if (authorId) url += `&author_id=${encodeURIComponent(authorId)}`
   const { data } = await axios.get(url)
   return data
 }
 
-export default function Feed({ showRead, showPreprints, searchQuery, isDark, toggleTheme }: any) {
+export default function Feed({ showRead, showPreprints, searchQuery, minScore, isDark, toggleTheme }: any) {
   const queryClient = useQueryClient()
   const { topicId, authorId } = useParams()
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({})
@@ -46,8 +46,8 @@ export default function Feed({ showRead, showPreprints, searchQuery, isDark, tog
 
 
   const { data: dashboard, isLoading, refetch } = useQuery({ 
-    queryKey: ['dashboard', topicId, authorId, showRead, showPreprints], 
-    queryFn: () => fetchDashboard(topicId, authorId, showRead, showPreprints) 
+    queryKey: ['dashboard', topicId, authorId, showRead, showPreprints, minScore], 
+    queryFn: () => fetchDashboard(topicId, authorId, showRead, showPreprints, minScore) 
   })
 
   // Invalidate queries when sync completes
@@ -195,7 +195,23 @@ export default function Feed({ showRead, showPreprints, searchQuery, isDark, tog
     return (
       <div id={id} className="mb-12 scroll-mt-24">
         <div className="flex justify-between items-end mb-4">
-          <h2 className="text-2xl font-bold flex items-center gap-2">{icon} {title}</h2>
+          <div className="flex items-center gap-4">
+            <h2 className="text-2xl font-bold flex items-center gap-2">{icon} {title}</h2>
+            <button 
+              onClick={() => {
+                const allIds = displayedItems.map((i: Item) => i.id)
+                const allSelected = allIds.every((id: string) => selectedItems.includes(id))
+                if (allSelected) {
+                  setSelectedItems(prev => prev.filter(id => !allIds.includes(id)))
+                } else {
+                  setSelectedItems(prev => Array.from(new Set([...prev, ...allIds])))
+                }
+              }}
+              className="text-xs bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground px-2 py-1 rounded-md transition-colors"
+            >
+              Select All
+            </button>
+          </div>
           {items.length > 6 && (
             <button 
               onClick={() => setExpandedSections(prev => ({...prev, [title]: !isExpanded}))}

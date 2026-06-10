@@ -27,7 +27,7 @@ const fetchTopics = async () => {
   return data
 }
 
-function Sidebar({ isMobileOpen, onClose, showRead, setShowRead, showPreprints, setShowPreprints, searchQuery, setSearchQuery }: any) {
+function Sidebar({ isMobileOpen, onClose, showRead, setShowRead, showPreprints, setShowPreprints, searchQuery, setSearchQuery, minScore, setMinScore }: any) {
   const { data: topics } = useQuery({ queryKey: ['topics'], queryFn: fetchTopics })
   const { data: syncProgress } = useQuery({ queryKey: ['syncProgress'], queryFn: fetchSyncProgress, refetchInterval: (data: any) => (data?.status === 'running' || data?.status === 'paused') ? 2000 : false })
   const { data: settings } = useQuery({ queryKey: ['settings'], queryFn: fetchSettings })
@@ -136,6 +136,21 @@ function Sidebar({ isMobileOpen, onClose, showRead, setShowRead, showPreprints, 
             />
             Show Preprints
           </label>
+          <label className="flex flex-col gap-1 text-sm text-foreground/80 px-1 mt-2">
+            <span className="flex justify-between">
+              <span>Minimum Score</span>
+              <span className="text-primary font-medium">{minScore.toFixed(2)}</span>
+            </span>
+            <input 
+              type="range" 
+              min="0" 
+              max="1" 
+              step="0.05" 
+              value={minScore} 
+              onChange={(e) => setMinScore(parseFloat(e.target.value))}
+              className="accent-primary"
+            />
+          </label>
         </div>
 
         <div className="mt-auto pb-6 px-6 space-y-4 pt-4">
@@ -156,7 +171,7 @@ function Sidebar({ isMobileOpen, onClose, showRead, setShowRead, showPreprints, 
   )
 }
 
-function Layout({ children, showRead, setShowRead, showPreprints, setShowPreprints, searchQuery, setSearchQuery }: any) {
+function Layout({ children, showRead, setShowRead, showPreprints, setShowPreprints, searchQuery, setSearchQuery, minScore, setMinScore }: any) {
   const [isMobileOpen, setIsMobileOpen] = useState(false)
 
   return (
@@ -169,7 +184,7 @@ function Layout({ children, showRead, setShowRead, showPreprints, setShowPreprin
         <span className="font-bold tracking-tight">PUBLIKATER</span>
       </div>
 
-      <Sidebar isMobileOpen={isMobileOpen} onClose={() => setIsMobileOpen(false)} showRead={showRead} setShowRead={setShowRead} showPreprints={showPreprints} setShowPreprints={setShowPreprints} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+      <Sidebar isMobileOpen={isMobileOpen} onClose={() => setIsMobileOpen(false)} showRead={showRead} setShowRead={setShowRead} showPreprints={showPreprints} setShowPreprints={setShowPreprints} searchQuery={searchQuery} setSearchQuery={setSearchQuery} minScore={minScore} setMinScore={setMinScore} />
       
       <main className="flex-1 min-w-0 md:h-screen md:overflow-y-auto relative">
         {children}
@@ -182,6 +197,7 @@ function App() {
   const [showRead, setShowRead] = useState(false)
   const [showPreprints, setShowPreprints] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
+  const [minScore, setMinScore] = useState(0.20)
   const [isDark, setIsDark] = useState(() => {
     const savedTheme = localStorage.getItem('theme')
     if (savedTheme) return savedTheme === 'dark'
@@ -212,11 +228,11 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <Layout showRead={showRead} setShowRead={setShowRead} showPreprints={showPreprints} setShowPreprints={setShowPreprints} searchQuery={searchQuery} setSearchQuery={setSearchQuery}>
+        <Layout showRead={showRead} setShowRead={setShowRead} showPreprints={showPreprints} setShowPreprints={setShowPreprints} searchQuery={searchQuery} setSearchQuery={setSearchQuery} minScore={minScore} setMinScore={setMinScore}>
           <Routes>
-            <Route path="/" element={<Feed showRead={showRead} showPreprints={showPreprints} searchQuery={searchQuery} isDark={isDark} toggleTheme={toggleTheme} />} />
-            <Route path="/topic/:topicId" element={<Feed showRead={showRead} showPreprints={showPreprints} searchQuery={searchQuery} isDark={isDark} toggleTheme={toggleTheme} />} />
-            <Route path="/author/:authorId" element={<Feed showRead={showRead} showPreprints={showPreprints} searchQuery={searchQuery} isDark={isDark} toggleTheme={toggleTheme} />} />
+            <Route path="/" element={<Feed showRead={showRead} showPreprints={showPreprints} searchQuery={searchQuery} minScore={minScore} isDark={isDark} toggleTheme={toggleTheme} />} />
+            <Route path="/topic/:topicId" element={<Feed showRead={showRead} showPreprints={showPreprints} searchQuery={searchQuery} minScore={minScore} isDark={isDark} toggleTheme={toggleTheme} />} />
+            <Route path="/author/:authorId" element={<Feed showRead={showRead} showPreprints={showPreprints} searchQuery={searchQuery} minScore={minScore} isDark={isDark} toggleTheme={toggleTheme} />} />
             <Route path="/starred" element={<Starred />} />
             <Route path="/discarded" element={<Discarded />} />
             <Route path="/settings" element={<Settings />} />

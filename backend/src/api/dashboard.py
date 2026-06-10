@@ -19,17 +19,19 @@ def serialize_item(item, score=None):
     return d
 
 @router.get("/", response_model=Dict[str, Any])
-def get_dashboard(topic_id: Optional[str] = None, author_id: Optional[str] = None, show_acknowledged: bool = False, show_preprints: bool = True, db: Session = Depends(get_db)):
+def get_dashboard(topic_id: Optional[str] = None, author_id: Optional[str] = None, show_acknowledged: bool = False, show_preprints: bool = True, min_score: float = 0.20, db: Session = Depends(get_db)):
     # Base query for Items
     if topic_id:
         base_query = db.query(Item, ItemScore.final_score).join(
             ItemScore, Item.id == ItemScore.item_id
         ).filter(ItemScore.topic_id == topic_id)
+        base_query = base_query.filter(ItemScore.final_score >= min_score)
     else:
         # If no topic, get the max score across all topics for the item
         base_query = db.query(Item, func.max(ItemScore.final_score).label('final_score')).outerjoin(
             ItemScore, Item.id == ItemScore.item_id
         ).group_by(Item.id)
+        base_query = base_query.having(func.max(ItemScore.final_score) >= min_score)
         
     # Always filter out hidden items
     base_query = base_query.filter(Item.is_hidden == False)

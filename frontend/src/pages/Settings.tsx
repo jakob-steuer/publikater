@@ -56,6 +56,7 @@ export default function Settings() {
   const [authorQuery, setAuthorQuery] = useState('')
   const [authorResults, setAuthorResults] = useState<AuthorResult[]>([])
   const [isSearchingAuthor, setIsSearchingAuthor] = useState(false)
+  const [authorBoost, setAuthorBoost] = useState('0.15')
 
   const { data: topics, isLoading: isLoadingTopics } = useQuery({ queryKey: ['topics'], queryFn: fetchTopics })
   const { data: config } = useQuery({ 
@@ -335,13 +336,29 @@ export default function Settings() {
           <h3 className="font-semibold mb-4">Add New Follow</h3>
           <div className="flex flex-col gap-2 relative">
             <label className="block text-sm font-medium">Search Author or paste ORCID</label>
-            <input 
-              type="text" 
-              value={authorQuery}
-              onChange={e => setAuthorQuery(e.target.value)}
-              placeholder="e.g. Geoffrey Hinton or 0000-0002-7562-386X"
-              className="w-full p-2 rounded border bg-background"
-            />
+            <p className="text-[11px] text-muted-foreground font-medium mb-1">
+              Adding authors via ORCID is highly recommended for best accuracy.
+            </p>
+            <div className="flex gap-2">
+              <input 
+                type="text" 
+                value={authorQuery}
+                onChange={e => setAuthorQuery(e.target.value)}
+                placeholder="e.g. Geoffrey Hinton or 0000-0002-7562-386X"
+                className="w-full p-2 rounded border bg-background"
+              />
+              <div className="flex items-center gap-2 whitespace-nowrap">
+                <label className="text-sm font-medium text-muted-foreground">Boost:</label>
+                <input 
+                  type="number" 
+                  step="0.05"
+                  value={authorBoost}
+                  onChange={e => setAuthorBoost(e.target.value)}
+                  className="w-20 p-2 rounded border bg-background"
+                  title="Score boost value for this author"
+                />
+              </div>
+            </div>
             
             {isSearchingAuthor && (
               <div className="absolute top-full left-0 right-0 mt-1 bg-card border rounded-md shadow-lg z-10 p-4 text-center text-sm text-muted-foreground">
@@ -362,7 +379,7 @@ export default function Settings() {
                         entity_type: 'author',
                         entity_value: entity_value,
                         display_name: display_name,
-                        boost_value: 0.15
+                        boost_value: parseFloat(authorBoost) || 0.15
                       })
                       setAuthorQuery('')
                       setAuthorResults([])
