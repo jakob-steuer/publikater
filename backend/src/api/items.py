@@ -635,10 +635,54 @@ class BulkRescoreRequest(BaseModel):
     item_ids: List[str]
 
 @router.post("/bulk_rescore", response_model=dict)
-def bulk_rescore(req: BulkRescoreRequest, db: Session = Depends(get_db)):
+async def bulk_rescore(req: BulkRescoreRequest, db: Session = Depends(get_db)):
     items = db.query(Item).filter(Item.id.in_(req.item_ids)).all()
     if not items:
         return {"status": "error", "message": "No items found"}
+        
+    # Attempt to fetch missing abstracts/embeddings from Semantic Scholar
+    missing_items = [item for item in items if (not item.abstract or item.abstract == "No abstract available.") or not item.embedding]
+    if missing_items:
+        identifiers = []
+        item_map = {}
+        for item in missing_items:
+            if item.corpus_id:
+                id_str = f"CorpusId:{item.corpus_id}"
+                identifiers.append(id_str)
+                item_map[id_str] = item
+            elif item.doi:
+                id_str = f"DOI:{item.doi}"
+                identifiers.append(id_str)
+                item_map[id_str] = item
+            elif item.source == "semantic_scholar" and item.source_native_id:
+                id_str = item.source_native_id
+                identifiers.append(id_str)
+                item_map[id_str] = item
+                
+        if identifiers:
+            try:
+                enriched = await enrich_papers_s2(identifiers)
+                for paper_data in enriched:
+                    pid = paper_data.get("paperId")
+                    cid = paper_data.get("corpusId")
+                    doi = paper_data.get("externalIds", {}).get("DOI")
+                    
+                    matching_item = None
+                    if cid and f"CorpusId:{cid}" in item_map:
+                        matching_item = item_map[f"CorpusId:{cid}"]
+                    elif pid and pid in item_map:
+                        matching_item = item_map[pid]
+                    elif doi and f"DOI:{doi}" in item_map:
+                        matching_item = item_map[f"DOI:{doi}"]
+                        
+                    if matching_item:
+                        if paper_data.get("abstract"):
+                            matching_item.abstract = paper_data.get("abstract")
+                        if paper_data.get("embedding") and paper_data["embedding"].get("specter_v2"):
+                            matching_item.embedding = paper_data["embedding"]["specter_v2"]
+                db.commit()
+            except Exception as e:
+                print(f"Failed to enrich missing items during rescore: {e}")
         
     active_topics = db.query(Topic).filter(Topic.is_active == True).all()
     topic_vectors = {}
