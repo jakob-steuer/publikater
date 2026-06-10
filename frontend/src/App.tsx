@@ -27,7 +27,7 @@ const fetchTopics = async () => {
   return data
 }
 
-function Sidebar({ isMobileOpen, onClose, showRead, setShowRead, showPreprints, setShowPreprints, showDiscarded, setShowDiscarded, searchQuery, setSearchQuery, minScore, setMinScore }: any) {
+function Sidebar({ isMobileOpen, onClose, showRated, setShowRated, showPreprints, setShowPreprints, searchQuery, setSearchQuery, minScore, setMinScore }: any) {
   const { data: topics } = useQuery({ queryKey: ['topics'], queryFn: fetchTopics })
   const { data: syncProgress } = useQuery({ queryKey: ['syncProgress'], queryFn: fetchSyncProgress, refetchInterval: (data: any) => (data?.status === 'running' || data?.status === 'paused') ? 2000 : false })
   const { data: settings } = useQuery({ queryKey: ['settings'], queryFn: fetchSettings })
@@ -121,11 +121,11 @@ function Sidebar({ isMobileOpen, onClose, showRead, setShowRead, showPreprints, 
           <label className="flex items-center gap-2 text-sm text-foreground/80 cursor-pointer px-1">
             <input 
               type="checkbox" 
-              checked={showRead} 
-              onChange={(e) => setShowRead(e.target.checked)}
+              checked={showRated} 
+              onChange={(e) => setShowRated(e.target.checked)}
               className="rounded accent-primary"
             />
-            Show Read
+            Show Rated
           </label>
           <label className="flex items-center gap-2 text-sm text-foreground/80 cursor-pointer px-1">
             <input 
@@ -135,15 +135,6 @@ function Sidebar({ isMobileOpen, onClose, showRead, setShowRead, showPreprints, 
               className="rounded accent-primary"
             />
             Show Preprints
-          </label>
-          <label className="flex items-center gap-2 text-sm text-foreground/80 cursor-pointer px-1">
-            <input 
-              type="checkbox" 
-              checked={showDiscarded} 
-              onChange={(e) => setShowDiscarded(e.target.checked)}
-              className="rounded accent-primary"
-            />
-            Show Discarded
           </label>
           <label className="flex flex-col gap-1 text-sm text-foreground/80 px-1 mt-2">
             <span className="flex justify-between">
@@ -193,7 +184,7 @@ function Layout({ children, showRead, setShowRead, showPreprints, setShowPreprin
         <span className="font-bold tracking-tight">PUBLIKATER</span>
       </div>
 
-      <Sidebar isMobileOpen={isMobileOpen} onClose={() => setIsMobileOpen(false)} showRead={showRead} setShowRead={setShowRead} showPreprints={showPreprints} setShowPreprints={setShowPreprints} showDiscarded={showDiscarded} setShowDiscarded={setShowDiscarded} searchQuery={searchQuery} setSearchQuery={setSearchQuery} minScore={minScore} setMinScore={setMinScore} />
+      <Sidebar isMobileOpen={isMobileOpen} onClose={() => setIsMobileOpen(false)} showRated={showRated} setShowRated={setShowRated} showPreprints={showPreprints} setShowPreprints={setShowPreprints} searchQuery={searchQuery} setSearchQuery={setSearchQuery} minScore={minScore} setMinScore={setMinScore} />
       
       <main className="flex-1 min-w-0 md:h-screen md:overflow-y-auto relative">
         {children}
@@ -203,9 +194,14 @@ function Layout({ children, showRead, setShowRead, showPreprints, setShowPreprin
 }
 
 function App() {
-  const [showRead, setShowRead] = useState(false)
-  const [showPreprints, setShowPreprints] = useState(true)
-  const [showDiscarded, setShowDiscarded] = useState(false)
+  const [showRated, setShowRated] = useState(() => {
+    const saved = localStorage.getItem('publikater_show_rated')
+    return saved !== null ? saved === 'true' : false
+  })
+  const [showPreprints, setShowPreprints] = useState(() => {
+    const saved = localStorage.getItem('publikater_show_preprints')
+    return saved !== null ? saved === 'true' : true
+  })
   const [searchQuery, setSearchQuery] = useState('')
   const [minScore, setMinScore] = useState(0.20)
   const [isDark, setIsDark] = useState(() => {
@@ -213,6 +209,14 @@ function App() {
     if (savedTheme) return savedTheme === 'dark'
     return window.matchMedia('(prefers-color-scheme: dark)').matches
   })
+
+  useEffect(() => {
+    localStorage.setItem('publikater_show_rated', showRated.toString())
+  }, [showRated])
+
+  useEffect(() => {
+    localStorage.setItem('publikater_show_preprints', showPreprints.toString())
+  }, [showPreprints])
 
   const toggleTheme = () => {
     const nextDark = !isDark
@@ -238,11 +242,11 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <Layout showRead={showRead} setShowRead={setShowRead} showPreprints={showPreprints} setShowPreprints={setShowPreprints} showDiscarded={showDiscarded} setShowDiscarded={setShowDiscarded} searchQuery={searchQuery} setSearchQuery={setSearchQuery} minScore={minScore} setMinScore={setMinScore}>
+        <Layout showRated={showRated} setShowRated={setShowRated} showPreprints={showPreprints} setShowPreprints={setShowPreprints} searchQuery={searchQuery} setSearchQuery={setSearchQuery} minScore={minScore} setMinScore={setMinScore}>
           <Routes>
-            <Route path="/" element={<Feed showRead={showRead} showPreprints={showPreprints} showDiscarded={showDiscarded} searchQuery={searchQuery} minScore={minScore} isDark={isDark} toggleTheme={toggleTheme} />} />
-            <Route path="/topic/:topicId" element={<Feed showRead={showRead} showPreprints={showPreprints} showDiscarded={showDiscarded} searchQuery={searchQuery} minScore={minScore} isDark={isDark} toggleTheme={toggleTheme} />} />
-            <Route path="/author/:authorId" element={<Feed showRead={showRead} showPreprints={showPreprints} showDiscarded={showDiscarded} searchQuery={searchQuery} minScore={minScore} isDark={isDark} toggleTheme={toggleTheme} />} />
+            <Route path="/" element={<Feed showRated={showRated} showPreprints={showPreprints} searchQuery={searchQuery} minScore={minScore} isDark={isDark} toggleTheme={toggleTheme} />} />
+            <Route path="/topic/:topicId" element={<Feed showRated={showRated} showPreprints={showPreprints} searchQuery={searchQuery} minScore={minScore} isDark={isDark} toggleTheme={toggleTheme} />} />
+            <Route path="/author/:authorId" element={<Feed showRated={showRated} showPreprints={showPreprints} searchQuery={searchQuery} minScore={minScore} isDark={isDark} toggleTheme={toggleTheme} />} />
             <Route path="/starred" element={<Starred />} />
             <Route path="/discarded" element={<Discarded />} />
             <Route path="/settings" element={<Settings />} />

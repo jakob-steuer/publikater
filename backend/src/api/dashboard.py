@@ -11,24 +11,26 @@ from src.models.follow import Follow
 
 router = APIRouter()
 
-def serialize_item(item, score=None):
+def serialize_item(item, score=None, user_vote=None):
     d = {**item.__dict__}
     d.pop("_sa_instance_state", None)
     if score is not None:
         d["score"] = score
+    if user_vote is not None:
+        d["user_vote"] = user_vote
     return d
 
 @router.get("/", response_model=Dict[str, Any])
 def get_dashboard(topic_id: Optional[str] = None, author_id: Optional[str] = None, show_acknowledged: bool = False, show_preprints: bool = True, show_discarded: bool = False, min_score: float = 0.20, db: Session = Depends(get_db)):
     # Base query for Items
     if topic_id:
-        base_query = db.query(Item, ItemScore.final_score).join(
+        base_query = db.query(Item, ItemScore.final_score, ItemScore.user_vote).join(
             ItemScore, Item.id == ItemScore.item_id
         ).filter(ItemScore.topic_id == topic_id)
         base_query = base_query.filter(ItemScore.final_score >= min_score)
     else:
-        # If no topic, get the max score across all topics for the item
-        base_query = db.query(Item, func.max(ItemScore.final_score).label('final_score')).outerjoin(
+        # If no topic, get the max score across all topics for the item, and max vote just in case
+        base_query = db.query(Item, func.max(ItemScore.final_score).label('final_score'), func.max(ItemScore.user_vote).label('user_vote')).outerjoin(
             ItemScore, Item.id == ItemScore.item_id
         ).group_by(Item.id)
         base_query = base_query.having(func.max(ItemScore.final_score) >= min_score)
@@ -66,7 +68,7 @@ def get_dashboard(topic_id: Optional[str] = None, author_id: Optional[str] = Non
         do_not_miss_query = recent_query.filter(ItemScore.final_score >= 0.90).order_by(desc(ItemScore.final_score), desc(Item.published_at))
     else:
         do_not_miss_query = recent_query.having(func.max(ItemScore.final_score) >= 0.90).order_by(desc('final_score'), desc(Item.published_at))
-    do_not_miss = [serialize_item(i[0], i[1]) for i in do_not_miss_query.limit(50).all()]
+    do_not_miss = [serialize_item(i[0], i[1], i[2]) for i in do_not_miss_query.limit(50).all()]
     
     # 2. This Week
     this_week_query = recent_query.filter(Item.published_at >= week_ago)
@@ -74,7 +76,7 @@ def get_dashboard(topic_id: Optional[str] = None, author_id: Optional[str] = Non
         this_week_query = this_week_query.order_by(desc(ItemScore.final_score), desc(Item.published_at))
     else:
         this_week_query = this_week_query.order_by(desc('final_score'), desc(Item.published_at))
-    this_week = [serialize_item(i[0], i[1]) for i in this_week_query.limit(50).all()]
+    this_week = [serialize_item(i[0], i[1], i[2]) for i in this_week_query.limit(50).all()]
     
     # 3. This Month
     this_month_query = recent_query.filter(Item.published_at >= month_ago).filter(Item.published_at < week_ago)
@@ -82,7 +84,7 @@ def get_dashboard(topic_id: Optional[str] = None, author_id: Optional[str] = Non
         this_month_query = this_month_query.order_by(desc(ItemScore.final_score), desc(Item.published_at))
     else:
         this_month_query = this_month_query.order_by(desc('final_score'), desc(Item.published_at))
-    this_month = [serialize_item(i[0], i[1]) for i in this_month_query.limit(50).all()]
+    this_month = [serialize_item(i[0], i[1], i[2]) for i in this_month_query.limit(50).all()]
     
     # 4. Highlighted Authors
     # Get followed authors
@@ -96,10 +98,11 @@ def get_dashboard(topic_id: Optional[str] = None, author_id: Optional[str] = Non
         for i in all_items:
             item = i[0]
             score = i[1]
+            user_vote = i[2]
             # Check if any author matches
             authors = [a.lower() for a in item.authors]
-            if any(followed_author in a for a in authors for followed_author in author_names):
-                highlighted_authors.append(serialize_item(item, score))
+            if any(an in a for an in author_names for a in authors):
+                highlighted_authors.append(serialize_item(item, score, user_vote))
         
         # Sort if topic_id
         if topic_id:
@@ -112,12 +115,12 @@ def get_dashboard(topic_id: Optional[str] = None, author_id: Optional[str] = Non
 
         
     # 6. Starred
-    starred_query = unfiltered_base_query.filter(Item.is_starred)
+    starred_query = unfiltered_base_query.filter(Item.is_starred == True)
     if topic_id:
         starred_query = starred_query.order_by(desc(ItemScore.final_score), desc(Item.published_at))
     else:
         starred_query = starred_query.order_by(desc('final_score'), desc(Item.published_at))
-    starred = [serialize_item(i[0], i[1]) for i in starred_query.limit(50).all()]
+    starred = [serialize_item(i[0], i[1], i[2]) for i in starred_query.limit(50).all()]
     
     # 7. Tools
     tools_query = recent_query.filter(Item.tools.isnot(None))

@@ -5,7 +5,7 @@ import type { UseMutationResult } from '@tanstack/react-query'
 import type { Item, Follow } from '../types'
 
 interface ItemCardProps {
-  item: Item & { score?: number };
+  item: Item & { score?: number, user_vote?: number };
   selectedItems: string[];
   toggleSelect: (id: string) => void;
   follows: Follow[];
@@ -68,28 +68,28 @@ export function ItemCard({
           <>
             <button 
               onClick={() => voteItem.mutate({ id: item.id, vote: 2 })}
-              className="hover:scale-110 transition-transform p-1 bg-background/50 rounded-full text-yellow-500 font-bold ml-1 flex items-center justify-center w-7 h-7 shadow-sm border border-yellow-200 dark:border-yellow-900"
+              className={`hover:scale-110 transition-transform p-1 rounded-full font-bold ml-1 flex items-center justify-center w-7 h-7 shadow-sm border ${item.user_vote === 2 ? 'bg-yellow-100 text-yellow-600 border-yellow-300 dark:bg-yellow-900/50 dark:border-yellow-700' : 'bg-background/50 text-yellow-500 border-yellow-200/50 dark:border-yellow-900/50 opacity-50 hover:opacity-100'}`}
               title="Star / Super Upvote (+2)"
             >
               ⭐
             </button>
             <button 
               onClick={() => voteItem.mutate({ id: item.id, vote: 1 })}
-              className="hover:scale-110 transition-transform p-1 bg-background/50 rounded-full text-green-500 font-bold ml-1 flex items-center justify-center w-7 h-7 shadow-sm border border-green-200 dark:border-green-900"
+              className={`hover:scale-110 transition-transform p-1 rounded-full font-bold ml-1 flex items-center justify-center w-7 h-7 shadow-sm border ${item.user_vote === 1 ? 'bg-green-100 text-green-600 border-green-300 dark:bg-green-900/50 dark:border-green-700' : 'bg-background/50 text-green-500 border-green-200/50 dark:border-green-900/50 opacity-50 hover:opacity-100'}`}
               title="Upvote (+1)"
             >
               👍
             </button>
             <button 
               onClick={() => voteItem.mutate({ id: item.id, vote: 0 })}
-              className="hover:scale-110 transition-transform p-1 bg-background/50 rounded-full text-blue-500 font-bold ml-1 flex items-center justify-center w-7 h-7 shadow-sm border border-blue-200 dark:border-blue-900"
+              className={`hover:scale-110 transition-transform p-1 rounded-full font-bold ml-1 flex items-center justify-center w-7 h-7 shadow-sm border ${item.user_vote === 0 ? 'bg-blue-100 text-blue-600 border-blue-300 dark:bg-blue-900/50 dark:border-blue-700' : 'bg-background/50 text-blue-500 border-blue-200/50 dark:border-blue-900/50 opacity-50 hover:opacity-100'}`}
               title="Neutral / Read (0)"
             >
-              👁️
+              ➖
             </button>
             <button 
               onClick={() => voteItem.mutate({ id: item.id, vote: -1 })}
-              className="hover:scale-110 transition-transform p-1 bg-background/50 rounded-full text-red-500 font-bold ml-1 flex items-center justify-center w-7 h-7 shadow-sm border border-red-200 dark:border-red-900"
+              className={`hover:scale-110 transition-transform p-1 rounded-full font-bold ml-1 flex items-center justify-center w-7 h-7 shadow-sm border ${item.user_vote === -1 ? 'bg-red-100 text-red-600 border-red-300 dark:bg-red-900/50 dark:border-red-700' : 'bg-background/50 text-red-500 border-red-200/50 dark:border-red-900/50 opacity-50 hover:opacity-100'}`}
               title="Downvote / Discard (-1)"
             >
               👎

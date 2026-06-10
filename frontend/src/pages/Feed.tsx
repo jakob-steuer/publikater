@@ -11,15 +11,15 @@ const fetchTopics = async () => {
   return data
 }
 
-const fetchDashboard = async (topicId?: string, authorId?: string, showAcknowledged: boolean = false, showPreprints: boolean = true, showDiscarded: boolean = false, minScore: number = 0.20) => {
-  let url = `http://localhost:8001/dashboard/?show_acknowledged=${showAcknowledged}&show_preprints=${showPreprints}&show_discarded=${showDiscarded}&min_score=${minScore}`
+const fetchDashboard = async (topicId?: string, authorId?: string, showRated: boolean = false, showPreprints: boolean = true, minScore: number = 0.20) => {
+  let url = `http://localhost:8001/dashboard/?show_acknowledged=${showRated}&show_preprints=${showPreprints}&show_discarded=${showRated}&min_score=${minScore}`
   if (topicId) url += `&topic_id=${topicId}`
   if (authorId) url += `&author_id=${encodeURIComponent(authorId)}`
   const { data } = await axios.get(url)
   return data
 }
 
-export default function Feed({ showRead, showPreprints, showDiscarded, searchQuery, minScore, isDark, toggleTheme }: any) {
+export default function Feed({ showRated, showPreprints, searchQuery, minScore, isDark, toggleTheme }: any) {
   const queryClient = useQueryClient()
   const { topicId, authorId } = useParams()
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({})
@@ -46,8 +46,8 @@ export default function Feed({ showRead, showPreprints, showDiscarded, searchQue
 
 
   const { data: dashboard, isLoading, refetch } = useQuery({ 
-    queryKey: ['dashboard', topicId, authorId, showRead, showPreprints, showDiscarded, minScore], 
-    queryFn: () => fetchDashboard(topicId, authorId, showRead, showPreprints, showDiscarded, minScore) 
+    queryKey: ['dashboard', topicId, authorId, showRated, showPreprints, minScore], 
+    queryFn: () => fetchDashboard(topicId, authorId, showRated, showPreprints, minScore) 
   })
 
   // Invalidate queries when sync completes
@@ -145,23 +145,13 @@ export default function Feed({ showRead, showPreprints, showDiscarded, searchQue
     }
   }
 
-  const handleBulkRead = async () => {
+  const handleBulkVote = async (vote: number) => {
     try {
-      await Promise.all(selectedItems.map(id => axios.put(`http://localhost:8001/items/${id}/acknowledge`)))
+      await Promise.all(selectedItems.map(id => axios.post(`http://localhost:8001/items/${id}/vote`, { topic_id: topicId || null, vote })))
       setSelectedItems([])
       refetch()
     } catch (e) {
-      console.error("Bulk read failed", e)
-    }
-  }
-
-  const handleBulkDismiss = async () => {
-    try {
-      await Promise.all(selectedItems.map(id => axios.put(`http://localhost:8001/items/${id}/hide`)))
-      setSelectedItems([])
-      refetch()
-    } catch (e) {
-      console.error("Bulk dismiss failed", e)
+      console.error("Bulk vote failed", e)
     }
   }
 
@@ -303,31 +293,50 @@ export default function Feed({ showRead, showPreprints, showDiscarded, searchQue
           )}
 
           {selectedItems.length > 0 && (
-            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-foreground text-background px-6 py-3 rounded-full shadow-2xl flex items-center gap-4 z-50 animate-in slide-in-from-bottom-5">
+            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-background text-foreground border border-border shadow-2xl px-6 py-3 rounded-full flex items-center gap-4 z-50 animate-in slide-in-from-bottom-5">
               <span className="font-semibold text-sm">{selectedItems.length} selected</span>
-              <div className="h-4 w-px bg-background/30"></div>
+              <div className="h-4 w-px bg-foreground/20"></div>
               <button 
                 onClick={() => handleExportBibtex(selectedItems)}
                 className="text-sm font-semibold hover:text-primary transition-colors flex items-center gap-2"
               >
                 BibTeX 📥
               </button>
-              <div className="h-4 w-px bg-background/30"></div>
-              <button 
-                onClick={handleBulkRead}
-                className="text-sm font-semibold hover:text-green-400 transition-colors flex items-center gap-2"
-              >
-                Mark Read ✓
-              </button>
-              <div className="h-4 w-px bg-background/30"></div>
-              <button 
-                onClick={handleBulkDismiss}
-                className="text-sm font-semibold hover:text-red-400 transition-colors flex items-center gap-2"
-              >
-                Dismiss ❌
-              </button>
-              <div className="h-4 w-px bg-background/30"></div>
-              <button onClick={() => setSelectedItems([])} className="text-sm opacity-80 hover:opacity-100">
+              <div className="h-4 w-px bg-foreground/20"></div>
+              
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => handleBulkVote(2)}
+                  className="hover:scale-110 transition-transform p-1 bg-yellow-50 text-yellow-500 rounded-full font-bold flex items-center justify-center w-7 h-7 shadow-sm border border-yellow-200 dark:bg-yellow-900/50 dark:border-yellow-900"
+                  title="Star / Super Upvote (+2)"
+                >
+                  ⭐
+                </button>
+                <button 
+                  onClick={() => handleBulkVote(1)}
+                  className="hover:scale-110 transition-transform p-1 bg-green-50 text-green-500 rounded-full font-bold flex items-center justify-center w-7 h-7 shadow-sm border border-green-200 dark:bg-green-900/50 dark:border-green-900"
+                  title="Upvote (+1)"
+                >
+                  👍
+                </button>
+                <button 
+                  onClick={() => handleBulkVote(0)}
+                  className="hover:scale-110 transition-transform p-1 bg-blue-50 text-blue-500 rounded-full font-bold flex items-center justify-center w-7 h-7 shadow-sm border border-blue-200 dark:bg-blue-900/50 dark:border-blue-900"
+                  title="Neutral / Read (0)"
+                >
+                  ➖
+                </button>
+                <button 
+                  onClick={() => handleBulkVote(-1)}
+                  className="hover:scale-110 transition-transform p-1 bg-red-50 text-red-500 rounded-full font-bold flex items-center justify-center w-7 h-7 shadow-sm border border-red-200 dark:bg-red-900/50 dark:border-red-900"
+                  title="Downvote / Discard (-1)"
+                >
+                  👎
+                </button>
+              </div>
+
+              <div className="h-4 w-px bg-foreground/20"></div>
+              <button onClick={() => setSelectedItems([])} className="text-sm opacity-60 hover:opacity-100">
                 Cancel
               </button>
             </div>
