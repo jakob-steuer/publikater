@@ -11,29 +11,34 @@ export default function Help() {
       </div>
 
       <div className="space-y-12">
-        {/* Section 1: Tri-state system */}
+        {/* Section 1: Voting system */}
         <section>
           <h2 className="text-2xl font-semibold mb-4 text-primary flex items-center gap-2">
             1. Using the Feed (Inbox Zero)
           </h2>
           <p className="text-foreground/80 mb-4 leading-relaxed">
-            Publicat uses a simple tri-state system to help you quickly process new papers and achieve "Inbox Zero".
+            Publicat uses a powerful voting system to help you quickly process new papers, while simultaneously teaching the AI your preferences.
           </p>
-          <div className="grid sm:grid-cols-3 gap-4">
+          <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-muted/30 border border-border/50 p-4 rounded-xl">
-              <div className="text-2xl mb-2">⭐</div>
-              <h3 className="font-semibold mb-1">Star</h3>
-              <p className="text-sm text-muted-foreground">Save this paper permanently to your Starred Library for future reading or export.</p>
+              <div className="text-2xl mb-2 text-yellow-500">⭐</div>
+              <h3 className="font-semibold mb-1">Star (+2)</h3>
+              <p className="text-sm text-muted-foreground">Save permanently. Heavily boosts similar papers.</p>
             </div>
             <div className="bg-muted/30 border border-border/50 p-4 rounded-xl">
-              <div className="text-2xl mb-2">✅</div>
-              <h3 className="font-semibold mb-1">Read / Acknowledge</h3>
-              <p className="text-sm text-muted-foreground">Mark as seen. It will be hidden from your main feed unless you toggle "Show Read".</p>
+              <div className="text-2xl mb-2 text-green-500">👍</div>
+              <h3 className="font-semibold mb-1">Upvote (+1)</h3>
+              <p className="text-sm text-muted-foreground">Relevant, but don't save. Boosts similar papers.</p>
             </div>
             <div className="bg-muted/30 border border-border/50 p-4 rounded-xl">
-              <div className="text-2xl mb-2">❌</div>
-              <h3 className="font-semibold mb-1">Discard</h3>
-              <p className="text-sm text-muted-foreground">Not relevant. Hides the paper entirely so it never clutters your feed again.</p>
+              <div className="text-2xl mb-2 text-blue-500">➖</div>
+              <h3 className="font-semibold mb-1">Neutral (0)</h3>
+              <p className="text-sm text-muted-foreground">Mark as read. No effect on future scoring.</p>
+            </div>
+            <div className="bg-muted/30 border border-border/50 p-4 rounded-xl">
+              <div className="text-2xl mb-2 text-red-500">👎</div>
+              <h3 className="font-semibold mb-1">Downvote (-1)</h3>
+              <p className="text-sm text-muted-foreground">Not relevant. Penalizes similar papers.</p>
             </div>
           </div>
           <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 mt-4">
@@ -47,14 +52,23 @@ export default function Help() {
         {/* Section 2: Setting up topics */}
         <section>
           <h2 className="text-2xl font-semibold mb-4 text-primary flex items-center gap-2">
-            2. Creating Great Topics
+            2. Creating Great Topics & Active Learning
           </h2>
           <p className="text-foreground/80 mb-4 leading-relaxed">
-            The AI matches papers based on the semantic meaning of your topic description and strict keyword boosting. For the best results, focus heavily on the <strong>methodology and core concepts</strong>, and avoid generic statements.
+            The AI initially matches papers based on the semantic meaning of your topic description and strict keyword boosting. For the best initial results, focus heavily on the <strong>methodology and core concepts</strong>, and avoid generic statements.
           </p>
           <div className="bg-primary/5 border border-primary/20 rounded-xl p-5 mb-4">
-            <h3 className="font-semibold text-primary mb-2">Tip: Use an LLM to write your topic</h3>
-            <p className="text-sm text-foreground/80 italic mb-2">
+            <h3 className="font-semibold text-primary mb-2">Continuous Active Learning 🧠</h3>
+            <p className="text-sm text-foreground/80 mb-2">
+              Publicat features a dynamic reranking system. As you <strong>Star (⭐)</strong>, <strong>Upvote (👍)</strong>, or <strong>Downvote (👎)</strong> papers in your feed, Publicat calculates personalized "pro" and "anti" concept vectors.
+            </p>
+            <p className="text-sm text-foreground/80">
+              This means while a good initial topic definition is important, the AI will continuously develop, personalize, and improve its scoring based entirely on your personal reading preferences and rankings over time!
+            </p>
+          </div>
+          <div className="bg-muted/30 border border-border/50 p-5 rounded-xl mb-4">
+            <h3 className="font-semibold mb-2">Tip: Use an LLM to write your topic</h3>
+            <p className="text-sm text-muted-foreground italic mb-2">
               "I want to create a feed for academic papers about [Your Topic]. Write a 2-3 sentence description focusing strictly on the methodology and core technologies involved, avoiding generic outcomes. Then provide a comma-separated list of 3-5 specific keywords."
             </p>
           </div>

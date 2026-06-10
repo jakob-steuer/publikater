@@ -66,7 +66,9 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 
 ## Tutorial: Setting Up Your First Topic
 
-Publicat uses AI to semantically match papers to your topics. The better you describe your topic, the better your feed will be!
+Publicat uses AI to semantically match papers to your topics. The better you describe your topic, the better your initial feed will be!
+
+**Continuous Active Learning 🧠:** Publicat features a dynamic reranking system. As you Star (⭐), Upvote (👍), or Downvote (👎) papers in your feed, Publicat dynamically calculates personalized "pro" and "anti" concept vectors specifically for that topic. This means that while a good initial topic definition is important, the AI will continuously develop, personalize, and improve its scoring based entirely on your personal reading preferences and rankings.
 
 **Pro Tip for Topic Descriptions:** Don't use a generic list of outcomes (like "predicts 3D structures"). Focus heavily on the *methodology* and the core concepts you want to read about.
 
@@ -85,11 +87,12 @@ If you're unsure how to describe your topic, ask an LLM of your choice:
 
 ## Using the Interface
 
-Publicat uses a simple, swipe-like tri-state system to help you reach Inbox Zero.
+Publicat uses a simple scoring and review system to help you reach Inbox Zero.
 
-- ⭐ **Star:** Save this paper. It will be permanently kept in your "Starred" feed for future reference.
-- ✅ **Read (Acknowledge):** You've seen this paper, but don't need to save it. It will be hidden from your main feed unless you toggle "Show Read".
-- ❌ **Discard:** Not relevant. Hides the paper entirely so it never clutters your feed again.
+- ⭐ **Star (+2):** Save this paper. It will be permanently kept in your "Starred" feed for future reference, and heavily boosts similar papers in your feed.
+- 👍 **Upvote (+1):** Relevant paper, but you don't need to save it permanently. Boosts similar papers.
+- ➖ **Neutral (0):** Mark as read. Neither boosts nor penalizes similar papers.
+- 👎 **Downvote / Discard (-1):** Not relevant. Hides the paper entirely and penalizes similar papers in the future.
 
 ### Features at a Glance
 - **Automatic Cleanup:** To prevent database bloat, any publication older than 60 days that you haven't explicitly starred is automatically removed. Starred papers are kept forever!
