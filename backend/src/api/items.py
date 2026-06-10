@@ -481,7 +481,7 @@ def get_progress():
 
 @router.get("/", response_model=List[dict])
 def get_items(skip: int = 0, limit: int = 100, topic_id: Optional[str] = None, show_acknowledged: bool = False, db: Session = Depends(get_db)):
-    query = db.query(Item, ItemScore.final_score).outerjoin(
+    query = db.query(Item, ItemScore.final_score, ItemScore.user_vote).outerjoin(
         ItemScore, Item.id == ItemScore.item_id
     )
     
@@ -494,16 +494,36 @@ def get_items(skip: int = 0, limit: int = 100, topic_id: Optional[str] = None, s
         query = query.filter(Item.is_acknowledged == False)
         
     results = query.offset(skip).limit(limit).all()
-    items = []
+    
+    items_dict = {}
+    
     for row in results:
         item = row[0]
         score = row[1]
-        d = {**item.__dict__}
-        d.pop("_sa_instance_state", None)
-        if score is not None:
-            d["score"] = score
-        items.append(d)
+        vote = row[2]
         
+        if item.id not in items_dict:
+            d = {**item.__dict__}
+            d.pop("_sa_instance_state", None)
+            d["score"] = score
+            d["user_vote"] = vote
+            items_dict[item.id] = d
+        else:
+            # If multiple topics, prefer the highest score and preserve vote if present
+            if score is not None and (items_dict[item.id].get("score") is None or score > items_dict[item.id]["score"]):
+                items_dict[item.id]["score"] = score
+            if vote is not None:
+                items_dict[item.id]["user_vote"] = vote
+        
+    # Preserve order of the results
+    items = []
+    seen = set()
+    for row in results:
+        item_id = row[0].id
+        if item_id not in seen:
+            items.append(items_dict[item_id])
+            seen.add(item_id)
+            
     return items
 
 @router.get("/starred", response_model=List[dict])
@@ -513,6 +533,10 @@ def get_starred_items(db: Session = Depends(get_db)):
     for item in items:
         d = {**item.__dict__}
         d.pop("_sa_instance_state", None)
+        
+        # Get the first score's user_vote if available, otherwise default to 2
+        score = db.query(ItemScore).filter(ItemScore.item_id == item.id).first()
+        d["user_vote"] = score.user_vote if score and score.user_vote is not None else 2
         results.append(d)
     return results
 
@@ -523,6 +547,10 @@ def get_discarded_items(db: Session = Depends(get_db)):
     for item in items:
         d = {**item.__dict__}
         d.pop("_sa_instance_state", None)
+        
+        # Get the first score's user_vote if available, otherwise default to -1
+        score = db.query(ItemScore).filter(ItemScore.item_id == item.id).first()
+        d["user_vote"] = score.user_vote if score and score.user_vote is not None else -1
         results.append(d)
     return results
 
