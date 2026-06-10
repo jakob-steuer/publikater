@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { ItemCard } from '../components/ItemCard'
 import { FilterBar } from '../components/FilterBar'
-import { Star, ThumbsUp, Minus, ThumbsDown } from 'lucide-react'
+import { Star, ThumbsUp, Minus, ThumbsDown, RefreshCw } from 'lucide-react'
 import type { Item, SyncProgress, Follow } from '../types'
 
 const fetchTopics = async () => {
@@ -153,6 +153,18 @@ export default function Feed({ showRated, showPreprints, searchQuery, minScore, 
       refetch()
     } catch (e) {
       console.error("Bulk vote failed", e)
+    }
+  }
+
+  const handleBulkRescore = async () => {
+    try {
+      await axios.post('http://localhost:8001/items/bulk_rescore', { item_ids: selectedItems })
+      setSelectedItems([])
+      refetch()
+      alert('Rescoring complete!')
+    } catch (e) {
+      console.error("Bulk rescore failed", e)
+      alert('Rescoring failed.')
     }
   }
 
@@ -335,6 +347,15 @@ export default function Feed({ showRated, showPreprints, searchQuery, minScore, 
                   <ThumbsDown size={16} />
                 </button>
               </div>
+
+              <div className="h-4 w-px bg-foreground/20"></div>
+              <button 
+                onClick={handleBulkRescore}
+                className="text-sm font-semibold text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-2"
+                title="Recalculate scores for selected items"
+              >
+                <RefreshCw size={16} /> Rescore
+              </button>
 
               <div className="h-4 w-px bg-foreground/20"></div>
               <button onClick={() => setSelectedItems([])} className="text-sm opacity-60 hover:opacity-100">

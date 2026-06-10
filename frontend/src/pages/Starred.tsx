@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import axios from 'axios'
 import { useState } from 'react'
 import { ItemCard } from '../components/ItemCard'
+import { Star, ThumbsUp, Minus, ThumbsDown, RefreshCw } from 'lucide-react'
 import type { Item, Follow } from '../types'
 
 const fetchStarred = async () => {
@@ -46,6 +47,28 @@ export default function Starred() {
     }
   }
 
+  const handleBulkVote = async (vote: number) => {
+    try {
+      await Promise.all(selectedItems.map(id => axios.post(`http://localhost:8001/items/${id}/vote`, { topic_id: null, vote })))
+      setSelectedItems([])
+      refetch()
+    } catch (e) {
+      console.error("Bulk vote failed", e)
+    }
+  }
+
+  const handleBulkRescore = async () => {
+    try {
+      await axios.post('http://localhost:8001/items/bulk_rescore', { item_ids: selectedItems })
+      setSelectedItems([])
+      refetch()
+      alert('Rescoring complete!')
+    } catch (e) {
+      console.error("Bulk rescore failed", e)
+      alert('Rescoring failed.')
+    }
+  }
+
   const unstarItem = useMutation({
     mutationFn: async (itemId: string) => {
       return axios.put(`http://localhost:8001/items/${itemId}/unstar`)
@@ -69,6 +92,13 @@ export default function Starred() {
 
   const starItem = useMutation({
     mutationFn: async (itemId: string) => axios.put(`http://localhost:8001/items/${itemId}/star`),
+    onSuccess: () => refetch()
+  })
+
+  const voteItem = useMutation({
+    mutationFn: async ({ id, vote }: { id: string, vote: number }) => {
+      return axios.post(`http://localhost:8001/items/${id}/vote`, { topic_id: null, vote })
+    },
     onSuccess: () => refetch()
   })
 
@@ -107,6 +137,7 @@ export default function Starred() {
       acknowledgeItem={acknowledgeItem}
       unacknowledgeItem={unacknowledgeItem}
       hideItem={hideItem}
+      voteItem={voteItem}
     />
   )
 
@@ -173,6 +204,48 @@ export default function Starred() {
               >
                 Export to BibTeX 📥
               </button>
+              <div className="h-4 w-px bg-background/30"></div>
+              
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => handleBulkVote(2)}
+                  className="hover:scale-110 transition-transform p-1 bg-background text-muted-foreground hover:text-yellow-500 rounded-full flex items-center justify-center w-8 h-8 shadow-sm border border-border/50"
+                  title="Star / Super Upvote (+2)"
+                >
+                  <Star size={16} />
+                </button>
+                <button 
+                  onClick={() => handleBulkVote(1)}
+                  className="hover:scale-110 transition-transform p-1 bg-background text-muted-foreground hover:text-green-500 rounded-full flex items-center justify-center w-8 h-8 shadow-sm border border-border/50"
+                  title="Upvote (+1)"
+                >
+                  <ThumbsUp size={16} />
+                </button>
+                <button 
+                  onClick={() => handleBulkVote(0)}
+                  className="hover:scale-110 transition-transform p-1 bg-background text-muted-foreground hover:text-blue-500 rounded-full flex items-center justify-center w-8 h-8 shadow-sm border border-border/50"
+                  title="Neutral / Read (0)"
+                >
+                  <Minus size={16} />
+                </button>
+                <button 
+                  onClick={() => handleBulkVote(-1)}
+                  className="hover:scale-110 transition-transform p-1 bg-background text-muted-foreground hover:text-red-500 rounded-full flex items-center justify-center w-8 h-8 shadow-sm border border-border/50"
+                  title="Downvote / Discard (-1)"
+                >
+                  <ThumbsDown size={16} />
+                </button>
+              </div>
+
+              <div className="h-4 w-px bg-background/30"></div>
+              <button 
+                onClick={handleBulkRescore}
+                className="text-sm font-semibold text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-2"
+                title="Recalculate scores for selected items"
+              >
+                <RefreshCw size={16} /> Rescore
+              </button>
+
               <div className="h-4 w-px bg-background/30"></div>
               <button onClick={() => setSelectedItems([])} className="text-sm opacity-80 hover:opacity-100">
                 Cancel

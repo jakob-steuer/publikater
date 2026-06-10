@@ -37,6 +37,7 @@ export function ItemCard({
   voteItem
 }: ItemCardProps) {
   const [expandedAuthors, setExpandedAuthors] = useState(false)
+  const [localVote, setLocalVote] = useState(item.user_vote)
   const isLongAuthorList = (item.author_details?.length ?? item.authors?.length ?? 0) > 8
   
   return (
@@ -68,32 +69,32 @@ export function ItemCard({
         {voteItem ? (
           <>
             <button 
-              onClick={() => voteItem.mutate({ id: item.id, vote: 2 })}
-              className={`hover:scale-110 transition-transform p-1 rounded-full ml-1 flex items-center justify-center w-8 h-8 shadow-sm border ${item.user_vote === 2 ? 'bg-yellow-100 text-yellow-600 border-yellow-300 dark:bg-yellow-900/50 dark:border-yellow-700' : 'bg-background/50 text-muted-foreground border-border/50 opacity-50 hover:opacity-100 hover:text-yellow-500'}`}
+              onClick={() => { setLocalVote(2); voteItem.mutate({ id: item.id, vote: 2 }); }}
+              className={`hover:scale-110 transition-transform p-1 rounded-full ml-1 flex items-center justify-center w-8 h-8 shadow-sm border ${localVote === 2 ? 'bg-yellow-100 text-yellow-600 border-yellow-300 dark:bg-yellow-900/50 dark:border-yellow-700' : 'bg-background/50 text-muted-foreground border-border/50 opacity-50 hover:opacity-100 hover:text-yellow-500'}`}
               title="Star / Super Upvote (+2)"
             >
-              <Star size={16} className={item.user_vote === 2 ? "fill-yellow-600" : ""} />
+              <Star size={16} className={localVote === 2 ? "fill-yellow-600" : ""} />
             </button>
             <button 
-              onClick={() => voteItem.mutate({ id: item.id, vote: 1 })}
-              className={`hover:scale-110 transition-transform p-1 rounded-full ml-1 flex items-center justify-center w-8 h-8 shadow-sm border ${item.user_vote === 1 ? 'bg-green-100 text-green-600 border-green-300 dark:bg-green-900/50 dark:border-green-700' : 'bg-background/50 text-muted-foreground border-border/50 opacity-50 hover:opacity-100 hover:text-green-500'}`}
+              onClick={() => { setLocalVote(1); voteItem.mutate({ id: item.id, vote: 1 }); }}
+              className={`hover:scale-110 transition-transform p-1 rounded-full ml-1 flex items-center justify-center w-8 h-8 shadow-sm border ${localVote === 1 ? 'bg-green-100 text-green-600 border-green-300 dark:bg-green-900/50 dark:border-green-700' : 'bg-background/50 text-muted-foreground border-border/50 opacity-50 hover:opacity-100 hover:text-green-500'}`}
               title="Upvote (+1)"
             >
-              <ThumbsUp size={16} className={item.user_vote === 1 ? "fill-green-600" : ""} />
+              <ThumbsUp size={16} className={localVote === 1 ? "fill-green-600" : ""} />
             </button>
             <button 
-              onClick={() => voteItem.mutate({ id: item.id, vote: 0 })}
-              className={`hover:scale-110 transition-transform p-1 rounded-full ml-1 flex items-center justify-center w-8 h-8 shadow-sm border ${item.user_vote === 0 ? 'bg-blue-100 text-blue-600 border-blue-300 dark:bg-blue-900/50 dark:border-blue-700' : 'bg-background/50 text-muted-foreground border-border/50 opacity-50 hover:opacity-100 hover:text-blue-500'}`}
+              onClick={() => { setLocalVote(0); voteItem.mutate({ id: item.id, vote: 0 }); }}
+              className={`hover:scale-110 transition-transform p-1 rounded-full ml-1 flex items-center justify-center w-8 h-8 shadow-sm border ${localVote === 0 ? 'bg-blue-100 text-blue-600 border-blue-300 dark:bg-blue-900/50 dark:border-blue-700' : 'bg-background/50 text-muted-foreground border-border/50 opacity-50 hover:opacity-100 hover:text-blue-500'}`}
               title="Neutral / Read (0)"
             >
               <Minus size={16} />
             </button>
             <button 
-              onClick={() => voteItem.mutate({ id: item.id, vote: -1 })}
-              className={`hover:scale-110 transition-transform p-1 rounded-full ml-1 flex items-center justify-center w-8 h-8 shadow-sm border ${item.user_vote === -1 ? 'bg-red-100 text-red-600 border-red-300 dark:bg-red-900/50 dark:border-red-700' : 'bg-background/50 text-muted-foreground border-border/50 opacity-50 hover:opacity-100 hover:text-red-500'}`}
+              onClick={() => { setLocalVote(-1); voteItem.mutate({ id: item.id, vote: -1 }); }}
+              className={`hover:scale-110 transition-transform p-1 rounded-full ml-1 flex items-center justify-center w-8 h-8 shadow-sm border ${localVote === -1 ? 'bg-red-100 text-red-600 border-red-300 dark:bg-red-900/50 dark:border-red-700' : 'bg-background/50 text-muted-foreground border-border/50 opacity-50 hover:opacity-100 hover:text-red-500'}`}
               title="Downvote / Discard (-1)"
             >
-              <ThumbsDown size={16} className={item.user_vote === -1 ? "fill-red-600" : ""} />
+              <ThumbsDown size={16} className={localVote === -1 ? "fill-red-600" : ""} />
             </button>
           </>
         ) : (
