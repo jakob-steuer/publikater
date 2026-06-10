@@ -112,6 +112,37 @@ Respond ONLY with a valid JSON object matching this schema:
             print(f"Anthropic Error: {e}")
             return []
 
+    async def evaluate_relevance(self, text: str, topic_desc: str) -> tuple[int, str]:
+        prompt = f"""You are a scientific peer-reviewer evaluating if a publication matches a specific research topic.
+Topic Description: '{topic_desc}'
+
+Publication Abstract:
+{text}
+
+Evaluate how relevant this publication is to the topic on a scale of 0 to 100.
+Also provide a 1-sentence justification for your score.
+
+Respond ONLY with a valid JSON object matching this schema:
+{{"score": 85, "reason": "The paper directly addresses the topic by investigating..."}}
+"""
+        try:
+            response = await self.client.messages.create(
+                model=self.model,
+                max_tokens=150,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            content = response.content[0].text
+            if "{" in content and "}" in content:
+                start = content.find("{")
+                end = content.rfind("}") + 1
+                content = content[start:end]
+            
+            data = json.loads(content)
+            return data.get("score", 0), data.get("reason", "No reason provided.")
+        except Exception as e:
+            print(f"Anthropic Evaluate Error: {e}")
+            return 0, "Error evaluating relevance."
+
     async def generate(self, prompt: str) -> str:
         try:
             response = await self.client.messages.create(

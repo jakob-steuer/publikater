@@ -50,6 +50,7 @@ export default function Settings() {
   const [anthropicKey, setAnthropicKey] = useState('')
   const [s2Key, setS2Key] = useState('')
   const [budget, setBudget] = useState('5.0')
+  const [enableLlmReranking, setEnableLlmReranking] = useState(true)
   const [isSavingConfig, setIsSavingConfig] = useState(false)
 
   // Author search state
@@ -82,6 +83,8 @@ export default function Settings() {
       setS2Key(config.s2_api_key || '')
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setBudget(config.anthropic_budget_limit?.toString() || '5.0')
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setEnableLlmReranking(config.enable_llm_reranking !== false)
     }
   }, [config])
 
@@ -169,7 +172,7 @@ export default function Settings() {
   }
 
   const saveSettings = useMutation({
-    mutationFn: async (newSettings: { gemini_api_key?: string, anthropic_api_key?: string, s2_api_key?: string, anthropic_budget_limit?: number }) => {
+    mutationFn: async (newSettings: { gemini_api_key?: string, anthropic_api_key?: string, s2_api_key?: string, anthropic_budget_limit?: number, enable_llm_reranking?: boolean }) => {
       return axios.post('http://localhost:8001/settings/', newSettings)
     },
     onSuccess: () => {
@@ -210,7 +213,8 @@ export default function Settings() {
       gemini_api_key: geminiKey,
       anthropic_api_key: anthropicKey,
       s2_api_key: s2Key,
-      anthropic_budget_limit: parseFloat(budget)
+      anthropic_budget_limit: parseFloat(budget),
+      enable_llm_reranking: enableLlmReranking
     })
   }
 
@@ -465,6 +469,19 @@ export default function Settings() {
               onChange={e => setBudget(e.target.value)}
               className="w-32 p-2 rounded border bg-background"
             />
+          </div>
+          <div className="flex items-center gap-2 pt-2 border-t mt-4 pb-2">
+            <input 
+              type="checkbox" 
+              id="enableRerank"
+              checked={enableLlmReranking}
+              onChange={e => setEnableLlmReranking(e.target.checked)}
+              className="rounded accent-primary w-4 h-4 cursor-pointer"
+            />
+            <label htmlFor="enableRerank" className="text-sm font-medium cursor-pointer">
+              Enable Stage 2 LLM Reranking
+            </label>
+            <span className="text-xs text-muted-foreground ml-2">(Turn off to save API tokens or speed up local syncs)</span>
           </div>
           <button 
             type="submit" 

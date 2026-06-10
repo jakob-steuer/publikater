@@ -18,6 +18,7 @@ def get_settings(db: Session = Depends(get_db)):
         "anthropic_api_key": get_config_value(db, "anthropic_api_key", ""),
         "s2_api_key": get_config_value(db, "s2_api_key", ""),
         "anthropic_budget_limit": float(get_config_value(db, "anthropic_budget_limit", "5.0")),
+        "enable_llm_reranking": get_config_value(db, "enable_llm_reranking", "true") == "true",
         "last_synced_at": get_config_value(db, "last_synced_at", None)
     }
 
@@ -38,6 +39,8 @@ def update_settings(settings: SettingsUpdate, db: Session = Depends(get_db)):
         set_config("s2_api_key", settings.s2_api_key)
     if settings.anthropic_budget_limit is not None:
         set_config("anthropic_budget_limit", str(settings.anthropic_budget_limit))
+    if settings.enable_llm_reranking is not None:
+        set_config("enable_llm_reranking", "true" if settings.enable_llm_reranking else "false")
         
     db.commit()
     return get_settings(db=db)

@@ -96,6 +96,33 @@ Respond ONLY with a valid JSON object matching this schema:
             print(f"Gemini Error: {e}")
             return []
 
+    async def evaluate_relevance(self, text: str, topic_desc: str) -> tuple[int, str]:
+        prompt = f"""You are a scientific peer-reviewer evaluating if a publication matches a specific research topic.
+Topic Description: '{topic_desc}'
+
+Publication Abstract:
+{text}
+
+Evaluate how relevant this publication is to the topic on a scale of 0 to 100.
+Also provide a 1-sentence justification for your score.
+
+Respond ONLY with a valid JSON object matching this schema:
+{{"score": 85, "reason": "The paper directly addresses the topic by investigating..."}}
+"""
+        try:
+            response = self.client.models.generate_content(
+                model=self.model,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                ),
+            )
+            data = json.loads(response.text)
+            return data.get("score", 0), data.get("reason", "No reason provided.")
+        except Exception as e:
+            print(f"Gemini Evaluate Error: {e}")
+            return 0, "Error evaluating relevance."
+
     async def generate(self, prompt: str) -> str:
         try:
             response = self.client.models.generate_content(

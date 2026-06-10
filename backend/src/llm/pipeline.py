@@ -36,9 +36,50 @@ async def run_summarization_pipeline(db: Session = None):
             primary_provider = GeminiProvider(gemini_key)
         else:
             primary_provider = OllamaProvider()
+            
+        enable_reranking = get_config("enable_llm_reranking", "true") == "true"
+        
+        # 0. Stage 2 Reranking (LLM Judge)
+        active_topics = db.query(Topic).filter(Topic.is_active).all()
+        if enable_reranking and primary_provider:
+            for topic in active_topics:
+                # Top 50 un-reranked papers for this topic
+                candidates = db.query(ItemScore, Item).join(
+                    Item, ItemScore.item_id == Item.id
+                ).filter(
+                    ItemScore.topic_id == topic.id,
+                    ItemScore.llm_relevance_score == None
+                ).order_by(ItemScore.final_score.desc()).limit(50).all()
+                
+                total_candidates = len(candidates)
+                for idx, (score, item) in enumerate(candidates):
+                    try:
+                        import asyncio
+                        from src.api.items import sync_state
+                        while sync_state["status"] == "paused":
+                            await asyncio.sleep(1.0)
+                        if sync_state["status"] == "aborted":
+                            return
+                        if sync_state["status"] == "running":
+                            sync_state["message"] = f"Reranking '{topic.name}' ({idx+1}/{total_candidates})..."
+                    except ImportError:
+                        pass
+                        
+                    print(f"Reranking item {item.id} against topic {topic.name}")
+                    abstract_text = f"{item.title}\n\n{item.abstract}"
+                    llm_score, reason = await primary_provider.evaluate_relevance(abstract_text, topic.description)
+                    
+                    score.llm_relevance_score = float(llm_score)
+                    relevance_multiplier = 0.5 + (score.llm_relevance_score / 100.0) # 0 -> 0.5x, 100 -> 1.5x
+                    score.final_score = score.final_score * relevance_multiplier
+                    
+                    current_reasons = list(score.reasons) if score.reasons else []
+                    current_reasons.append(f"LLM Reranked ({llm_score}/100): {reason}")
+                    score.reasons = current_reasons
+                    
+                    db.commit()
         
         # 1. Identify all items in the Dashboard Top 6
-        active_topics = db.query(Topic).filter(Topic.is_active).all()
         target_item_ids = set()
         
         # Default generic dashboard (no topic)
@@ -96,10 +137,10 @@ async def run_summarization_pipeline(db: Session = None):
             
             if summary:
                 item.t2_summary = summary
-                if item_score:
-                    item_score.llm_relevance_score = float(rel_score)
-                    # Boost final score based on relevance
-                    relevance_multiplier = 0.5 + (item_score.llm_relevance_score / 20.0)
+                if item_score and item_score.llm_relevance_score is None:
+                    # Legacy fallback if reranking was skipped
+                    item_score.llm_relevance_score = float(rel_score * 10) # convert 1-10 to 1-100
+                    relevance_multiplier = 0.5 + (item_score.llm_relevance_score / 100.0)
                     item_score.final_score = item_score.semantic_score * relevance_multiplier
                 db.commit()
                 

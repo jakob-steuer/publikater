@@ -25,5 +25,13 @@ class LLMProvider(ABC):
         pass
 
     @abstractmethod
+    async def evaluate_relevance(self, text: str, topic_desc: str) -> tuple[int, str]:
+        """
+        Fast evaluation returning a score from 1-100 and a 1-sentence reason.
+        Returns: (score, reason)
+        """
+        pass
+
+    @abstractmethod
     async def generate(self, prompt: str) -> str:
         pass

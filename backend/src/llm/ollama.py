@@ -119,6 +119,38 @@ Respond ONLY with a valid JSON object matching this schema:
             print(f"Ollama Error: {e}")
             return []
 
+    async def evaluate_relevance(self, text: str, topic_desc: str) -> tuple[int, str]:
+        prompt = f"""You are a scientific peer-reviewer evaluating if a publication matches a specific research topic.
+Topic Description: '{topic_desc}'
+
+Publication Abstract:
+{text}
+
+Evaluate how relevant this publication is to the topic on a scale of 0 to 100.
+Also provide a 1-sentence justification for your score.
+
+Respond ONLY with a valid JSON object matching this schema:
+{{"score": 85, "reason": "The paper directly addresses the topic by investigating..."}}
+"""
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    f"{self.host}/api/generate",
+                    json={
+                        "model": self.model,
+                        "prompt": prompt,
+                        "stream": False,
+                        "format": "json"
+                    },
+                    timeout=30.0
+                )
+                response.raise_for_status()
+                data = json.loads(response.json()["response"])
+                return data.get("score", 0), data.get("reason", "No reason provided.")
+        except Exception as e:
+            print(f"Ollama Evaluate Error: {e}")
+            return 0, "Error evaluating relevance."
+
     async def generate(self, prompt: str) -> str:
         try:
             async with httpx.AsyncClient() as client:

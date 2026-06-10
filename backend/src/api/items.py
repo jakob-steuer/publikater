@@ -139,6 +139,15 @@ async def run_ingestion(db: Session, days_back: int = 3):
     author_follows = [(f.entity_value, f.display_name or f.entity_value, f.boost_value) for f in follows if f.entity_type == "author"]
     venue_follows = {f.entity_value.lower(): f.boost_value for f in follows if f.entity_type == "venue"}
     
+    # Calculate Anti-Topic Vector
+    discarded_items = db.query(Item).filter(Item.is_hidden == True).all()
+    anti_vector = None
+    if discarded_items:
+        import numpy as np
+        vectors = [i.embedding for i in discarded_items if i.embedding and isinstance(i.embedding, list) and len(i.embedding) == 768]
+        if vectors:
+            anti_vector = np.mean(vectors, axis=0).tolist()
+    
     total_papers = len(enriched_papers)
     for idx, paper in enumerate(enriched_papers):
         sync_state["message"] = f"Processing and Scoring papers ({idx + 1}/{total_papers})..."
@@ -261,9 +270,18 @@ async def run_ingestion(db: Session, days_back: int = 3):
                 # Calibrate Specter V2 embeddings: random papers ~0.72, highly related ~0.88+
                 sim = max(0.0, min(1.0, (raw_sim - 0.72) * 5.0))
                 
+                topic_specific_reasons = []
+                
+                # Apply Negative Feedback Penalty
+                if anti_vector:
+                    anti_sim = compute_cosine_similarity(item_emb, anti_vector)
+                    if anti_sim > 0.80:
+                        penalty = min(0.5, (anti_sim - 0.80) * 3.0)
+                        sim = max(0.0, sim - penalty)
+                        topic_specific_reasons.append(f"Anti-topic penalty (-{penalty:.2f})")
+                
                 # Topic-specific Keyword Boosting
                 topic_boost = 0.0
-                topic_specific_reasons = []
                 if topic.keywords:
                     kws = [k.strip().lower() for k in topic.keywords.split(",")]
                     paper_title = paper.get("title", "").lower() if paper.get("title") else ""
