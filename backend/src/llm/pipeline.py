@@ -47,42 +47,44 @@ async def run_summarization_pipeline(db: Session = None):
                 rerank_provider = OllamaProvider()
                 
             if rerank_provider:
-            for topic in active_topics:
-                # Top 50 un-reranked papers for this topic
-                candidates = db.query(ItemScore, Item).join(
-                    Item, ItemScore.item_id == Item.id
-                ).filter(
-                    ItemScore.topic_id == topic.id,
-                    ItemScore.llm_relevance_score == None
-                ).order_by(ItemScore.final_score.desc()).limit(50).all()
-                
-                total_candidates = len(candidates)
-                for idx, (score, item) in enumerate(candidates):
-                    try:
-                        import asyncio
-                        from src.api.items import sync_state
-                        while sync_state["status"] == "paused":
-                            await asyncio.sleep(1.0)
-                        if sync_state["status"] == "aborted":
-                            return
-                        if sync_state["status"] == "running":
-                            sync_state["message"] = f"Reranking '{topic.name}' ({idx+1}/{total_candidates})..."
-                    except ImportError:
-                        pass
+                for topic in active_topics:
+                    # Top 50 un-reranked papers for this topic
+                    candidates = db.query(ItemScore, Item).join(
+                        Item, ItemScore.item_id == Item.id
+                    ).filter(
+                        ItemScore.topic_id == topic.id,
+                        ItemScore.llm_relevance_score == None
+                    ).order_by(ItemScore.final_score.desc()).limit(50).all()
+                    
+                    total_candidates = len(candidates)
+                    for idx, (score, item) in enumerate(candidates):
+                        try:
+                            import asyncio
+                            from src.api.items import sync_state
+                            while sync_state["status"] == "paused":
+                                await asyncio.sleep(1.0)
+                            if sync_state["status"] == "aborted":
+                                return
+                                
+                            # Update progress bar dynamically (0 to 10 for reranking phase)
+                            if sync_state["status"] == "running":
+                                progress_pct = int(10 * (idx / max(1, total_candidates)))
+                                sync_state["progress"] = progress_pct
+                                sync_state["message"] = f"Stage 2 Reranking ({idx+1}/{total_candidates}) for {topic.name}..."
+                        except ImportError:
+                            pass
+                            
+                        print(f"Reranking item {item.id} against topic {topic.name} using {rerank_provider.__class__.__name__}")
+                        abstract_text = f"{item.title}\n\n{item.abstract}"
+                        llm_score, reason = await rerank_provider.evaluate_relevance(abstract_text, topic.description)
                         
-                    print(f"Reranking item {item.id} against topic {topic.name} using {rerank_provider.__class__.__name__}")
-                    abstract_text = f"{item.title}\n\n{item.abstract}"
-                    llm_score, reason = await rerank_provider.evaluate_relevance(abstract_text, topic.description)
-                    
-                    score.llm_relevance_score = float(llm_score)
-                    relevance_multiplier = 0.5 + (score.llm_relevance_score / 100.0) # 0 -> 0.5x, 100 -> 1.5x
-                    score.final_score = score.final_score * relevance_multiplier
-                    
-                    current_reasons = list(score.reasons) if score.reasons else []
-                    current_reasons.append(f"LLM Reranked ({llm_score}/100): {reason}")
-                    score.reasons = current_reasons
-                    
-                    db.commit()
+                        score.llm_relevance_score = float(llm_score)
+                        relevance_multiplier = 0.5 + (score.llm_relevance_score / 100.0) # 0 -> 0.5x, 100 -> 1.5x
+                        score.final_score = score.semantic_score * relevance_multiplier
+                        
+                        score.reasons = list(score.reasons) + [f"LLM Relevance: {llm_score}/10. {reason}"]
+                        
+                        db.commit()
         
         # 1. Identify all items in the Dashboard Top 6
         target_item_ids = set()
