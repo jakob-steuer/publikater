@@ -37,11 +37,16 @@ async def run_summarization_pipeline(db: Session = None):
         else:
             primary_provider = OllamaProvider()
             
-        enable_reranking = get_config("enable_llm_reranking", "true") == "true"
+        reranking_mode = get_config("reranking_mode", "llm") # "llm", "local", "disabled"
         
         # 0. Stage 2 Reranking (LLM Judge)
         active_topics = db.query(Topic).filter(Topic.is_active).all()
-        if enable_reranking and primary_provider:
+        if reranking_mode != "disabled":
+            rerank_provider = primary_provider
+            if reranking_mode == "local":
+                rerank_provider = OllamaProvider()
+                
+            if rerank_provider:
             for topic in active_topics:
                 # Top 50 un-reranked papers for this topic
                 candidates = db.query(ItemScore, Item).join(
@@ -65,9 +70,9 @@ async def run_summarization_pipeline(db: Session = None):
                     except ImportError:
                         pass
                         
-                    print(f"Reranking item {item.id} against topic {topic.name}")
+                    print(f"Reranking item {item.id} against topic {topic.name} using {rerank_provider.__class__.__name__}")
                     abstract_text = f"{item.title}\n\n{item.abstract}"
-                    llm_score, reason = await primary_provider.evaluate_relevance(abstract_text, topic.description)
+                    llm_score, reason = await rerank_provider.evaluate_relevance(abstract_text, topic.description)
                     
                     score.llm_relevance_score = float(llm_score)
                     relevance_multiplier = 0.5 + (score.llm_relevance_score / 100.0) # 0 -> 0.5x, 100 -> 1.5x

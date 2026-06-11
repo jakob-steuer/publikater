@@ -50,7 +50,7 @@ export default function Settings() {
   const [anthropicKey, setAnthropicKey] = useState('')
   const [s2Key, setS2Key] = useState('')
   const [budget, setBudget] = useState('5.0')
-  const [enableLlmReranking, setEnableLlmReranking] = useState(true)
+  const [rerankingMode, setRerankingMode] = useState('llm')
   const [isSavingConfig, setIsSavingConfig] = useState(false)
 
   // Author search state
@@ -84,7 +84,7 @@ export default function Settings() {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setBudget(config.anthropic_budget_limit?.toString() || '5.0')
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setEnableLlmReranking(config.enable_llm_reranking !== false)
+      setRerankingMode(config.reranking_mode || 'llm')
     }
   }, [config])
 
@@ -214,7 +214,7 @@ export default function Settings() {
       anthropic_api_key: anthropicKey,
       s2_api_key: s2Key,
       anthropic_budget_limit: parseFloat(budget),
-      enable_llm_reranking: enableLlmReranking
+      reranking_mode: rerankingMode
     })
   }
 
@@ -470,18 +470,44 @@ export default function Settings() {
               className="w-32 p-2 rounded border bg-background"
             />
           </div>
-          <div className="flex items-center gap-2 pt-2 border-t mt-4 pb-2">
-            <input 
-              type="checkbox" 
-              id="enableRerank"
-              checked={enableLlmReranking}
-              onChange={e => setEnableLlmReranking(e.target.checked)}
-              className="rounded accent-primary w-4 h-4 cursor-pointer"
-            />
-            <label htmlFor="enableRerank" className="text-sm font-medium cursor-pointer">
-              Enable Stage 2 LLM Reranking
-            </label>
-            <span className="text-xs text-muted-foreground ml-2">(Turn off to save API tokens or speed up local syncs)</span>
+          <div className="border-t mt-4 pt-4 space-y-3 pb-2">
+            <label className="block text-sm font-medium">Stage 2 LLM Reranking / Rescoring</label>
+            <div className="flex flex-col sm:flex-row gap-4 sm:items-center text-sm text-foreground/80 cursor-pointer">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input 
+                  type="radio" 
+                  name="reranking_mode" 
+                  value="llm" 
+                  checked={rerankingMode === 'llm'}
+                  onChange={e => setRerankingMode(e.target.value)}
+                  className="accent-primary"
+                />
+                Use API (Anthropic/Gemini)
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input 
+                  type="radio" 
+                  name="reranking_mode" 
+                  value="local" 
+                  checked={rerankingMode === 'local'}
+                  onChange={e => setRerankingMode(e.target.value)}
+                  className="accent-primary"
+                />
+                Use Local (Ollama)
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input 
+                  type="radio" 
+                  name="reranking_mode" 
+                  value="disabled" 
+                  checked={rerankingMode === 'disabled'}
+                  onChange={e => setRerankingMode(e.target.value)}
+                  className="accent-primary"
+                />
+                Disabled
+              </label>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">Choose 'Disabled' to skip stage 2 AI reranking entirely (saves API tokens and speeds up syncs). Choose 'Use Local' to enforce using Ollama even if you provided API keys above.</p>
           </div>
           <button 
             type="submit" 
