@@ -47,7 +47,7 @@ export function FilterBar({
                 ? `http://localhost:8001/api/export/zotero/rss?topic_id=${topicId}`
                 : `http://localhost:8001/api/export/zotero/rss`
               navigator.clipboard.writeText(url)
-              alert("Zotero RSS URL copied to clipboard! Add this as a New Feed in Zotero.")
+              prompt("Zotero RSS URL copied to clipboard! Add this as a New Feed in Zotero:", url)
             }}
             className="text-xs bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 px-3 py-1.5 rounded-md flex items-center gap-1.5 font-semibold transition-colors"
             title="Copy Zotero RSS Feed URL"

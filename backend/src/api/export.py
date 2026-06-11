@@ -67,7 +67,10 @@ def zotero_rss_feed(topic_id: Optional[str] = None, db: Session = Depends(get_db
     
     if topic_id:
         from src.models.item_score import ItemScore
-        query = query.join(ItemScore, Item.id == ItemScore.item_id).filter(ItemScore.topic_id == topic_id)
+        query = query.join(ItemScore, Item.id == ItemScore.item_id).filter(
+            ItemScore.topic_id == topic_id,
+            ItemScore.user_vote == 2
+        )
         
     items = query.order_by(Item.published_at.desc()).limit(100).all()
     
