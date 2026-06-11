@@ -10,6 +10,9 @@ from apscheduler.triggers.interval import IntervalTrigger
 
 from src.database import SessionLocal
 from src.api import items, topics, settings, follows, dashboard, rss, export
+import logging
+
+logging.getLogger("huggingface_hub").setLevel(logging.ERROR)
 
 scheduler = AsyncIOScheduler()
 

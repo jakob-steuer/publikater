@@ -92,7 +92,7 @@ def main():
         # (because start.sh / start.bat uses `uv run launcher.py`)
         print("Starting Uvicorn...")
         server_process = subprocess.Popen(
-            [sys.executable, "-m", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", str(port)],
+            [sys.executable, "-m", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", str(port), "--no-access-log"],
             cwd=backend_dir,
             env=env
         )
